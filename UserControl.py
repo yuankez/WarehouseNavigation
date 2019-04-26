@@ -7,9 +7,16 @@ def main():
     data = DataManagement.Data()
     board = WarehouseMap.Map()
     #datafile = input("/Users/Yuank/Desktop/WarehouseNavigation/MyFile.txt")
-    data.inputdata("/Users/Yuank/Desktop/WarehouseNavigation/MyFile.txt")
-    #item_pick = input("Input the product id you want to pick\n")
+    data.inputdata("/Users/Yuank/Desktop/WarehouseNavigation/qvBox-warehouse-data-s19-v01.txt")
+    #itemcheck = input("Input the product id you want to check\n")
     data.finditemsinformation('149')
-    data.printworldtemp()
+
+    startlocation = [0,0];
+    # or input by user
+    #startlocation = input("where you want to start")
+    data.printworldtemp(startlocation)
+    print("S means shelf location, B means start begin location")
+    productpick = input("Input the product id you want to pick EX: 149\n")
+    data.findpathtoitem(productpick)
 
 main()
