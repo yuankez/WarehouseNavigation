@@ -21,7 +21,7 @@ class Data:
         dataFile = open(filename, 'r')
         print("File read.")
         header = dataFile.readline().strip().split('\t')
-        print("Headers of Data = ", header)
+        #print("Headers of Data = ", header)
         data = []
         count = 0
         temp = 0
@@ -47,7 +47,7 @@ class Data:
             self.result_val.clear()
             count += 1
             #print(self.result_key)
-            if count == 100:
+            if count == 50:
                 break
         dataFile.close()
         #return self.result_key
@@ -66,7 +66,7 @@ class Data:
     def printworldtemp(self, startlocation):
         rowmax = 0
         colmax = 0
-        shelflist = dict()
+        shelflist = list()
         self.avaliablepath = list()
         for key,value in self.result_key.items():
             shelflist.append([int(float(self.result_key[key]['xLocation'])), int(self.result_key[key]['yLocation'])])
@@ -76,18 +76,52 @@ class Data:
                 rowmax = int(float(self.result_key[key]['xLocation']))
             if  tempy > int(colmax):
                 colmax = int(self.result_key[key]['yLocation'])
+
         print("warehouse row siz is: ", rowmax, "warehouse column size is: ", colmax)
-        for i in range(colmax):
-            for h in range(rowmax):
-                if [h,i] == startlocation:
+
+        for i in range(colmax+1):
+            for h in range(rowmax+2):
+                if h == rowmax+1 and i < 10:
+                    print(" ",colmax - i,"", end = '')
+                elif h == rowmax+1 and i >= 10:
+                    print(" ", colmax - i, " ",end='')
+                elif [h,colmax -i] == startlocation:
                     self.avaliablepath.append([h,i])
                     print("  B  ", end = '')
-                if [h,i] in shelflist:
+                elif [h,colmax -i] in shelflist:
                     print("  S  ", end = '')
                 else:
-                    self.avaliablepath.append([h,i])
-                    print("  .  ", end = '')
+                    if [h, colmax - i] != [0,0]:
+                        self.avaliablepath.append([h,colmax - i])
+                        print("  .  ", end = '')
             print('\n')
+
+        for i in range(rowmax+2):
+            if i == 0:
+                print("", end = '')
+            elif i == rowmax+1:
+                print(" ", i-1," \n")
+            elif i == rowmax+2:
+                break
+            elif i >= 10:
+                print("  ", i-1, end = '')
+            else:
+                print(" ",i-1," ", end = '')
+
+    def findpathtoitem1(self, productID):
+        self.currentPos_list = list()
+        self.path_graph = dict()
+        print(self.result_key)
+        print(productID)
+        for i in self.result_key.items():
+            self.currentPos_list.append([int(float(i[1]['xLocation'])), int(float(i[1]['yLocation']))])
+        print (self.currentPos_list)
+                    #temp = value
+                    # del result_key[temp]
+                #else:
+                 #   self.result_val[key] = value
+
+
     def findpathtoitem(self, productID):
         keys = self.result_key.keys()
         aimproduct = dict()
@@ -104,7 +138,13 @@ class Data:
         time.sleep(1)
         print("product want to pick:", productID, "product location: ", aimproductlocation)
         time.sleep(1)
+
+
+
         print("Robot facing to left")
+
+
+
         for i in range(int(aimproductlocation[0])):
             if (int(aimproductlocation[0]) - int(currentlocation[0])) >= 0:
                 currentlocation = [int(currentlocation[0])+1, int(currentlocation[1])]
@@ -115,6 +155,8 @@ class Data:
         time.sleep(1)
         print("Robot moving up:")
         time.sleep(1)
+
+
         for h in range(int(aimproductlocation[1])):
             if (int(aimproductlocation[1]) - int(currentlocation[1])) >= 0:
                 currentlocation = [int(currentlocation[0]), int(currentlocation[1])+1]
