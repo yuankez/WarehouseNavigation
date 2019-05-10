@@ -16,11 +16,25 @@ def main():
     data.finditemsinformation('1')
 
     startlocation = [0,0];
+    productpick = '149'
+    #productpick = input("Input the product id you want to pick EX: 149\n")
     # or input by user
+    testcase1 = ['1']
+    testcase2 = ['102', '219', '302','626', '670'] #upgoing
+    testcase3 = ['1520','1387', '1355','1045', '1025', '670','626', '302', '219', '102']#desecending order
+    testcase4 = ['1520','1387', '1958','2010','1355','1045','2029', '2826', '2947','1025', '670','626', '302', '219', '102']#random order
+    testcase5 = ['1','74','45','102','149']# xlocation bump back and force
+    testcase6 = ['1','74','102','102','149']# try to pick up same item twice
+    testcase7 = ['1','74','102','103','149']#one of item not exit '103'
+
     #startlocation = input("where you want to start")
-    data.printworldtemp(startlocation)
+    data.printworldtemp(startlocation,productpick)
     #print("S means shelf location, B means start begin location")
     #productpick = input("Input the product id you want to pick EX: 149\n")
-    data.findpathtoitem1('149')
+    listproduct = ['0','45', '149']
+    for i in listproduct:
+        data.printworldtemp(startlocation, productpick)
+        #data.findpathtoitem1(i)
+
 
 main()
