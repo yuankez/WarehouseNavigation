@@ -5,6 +5,7 @@ import math
 import json
 import time
 from collections import defaultdict
+from queue import *
 
 class Data:
     #global result_key,result_val
@@ -41,20 +42,23 @@ class Data:
                     temp = value
                     # del result_key[temp]
                 else:
-                    self.result_val[key] = value
+                    self.result_val[key] = int(float(value))
             temp_dict = self.result_val.copy()
             self.result_key[temp] = temp_dict
             self.result_val.clear()
             count += 1
-            #print(self.result_key)
-            if count == 50:
-                break
+            print(self.result_key)
+            if count == 10:
+               break
         dataFile.close()
+        self.currentPos_list = list()
+        for i in self.result_key.items():
+            self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
         #return self.result_key
 
     def finditemsinformation(self, product_ID):
         keys = self.result_key.keys()
-        #print(keys)
+        print(self.result_key)
         #print(self.result_key[product_ID])
         if product_ID not in keys:
             print("Database does not have this item. Input Over")
@@ -68,18 +72,19 @@ class Data:
         colmax = 0
         shelflist = list()
         self.avaliablepath = list()
+        self.map = list()
         for key,value in self.result_key.items():
-            shelflist.append([int(float(self.result_key[key]['xLocation'])), int(self.result_key[key]['yLocation'])])
-            tempy = int(self.result_key[key]['yLocation'])
-            tempx = int(float(self.result_key[key]['xLocation']))
+            shelflist.append([self.result_key[key]['xLocation'], self.result_key[key]['yLocation']])
+            tempy = self.result_key[key]['yLocation']
+            tempx = self.result_key[key]['xLocation']
             if tempx > int(rowmax):
-                rowmax = int(float(self.result_key[key]['xLocation']))
+                rowmax = self.result_key[key]['xLocation']
             if  tempy > int(colmax):
-                colmax = int(self.result_key[key]['yLocation'])
+                colmax = self.result_key[key]['yLocation']
 
         print("warehouse row siz is: ", rowmax, "warehouse column size is: ", colmax)
-
         for i in range(colmax+1):
+            templist = list()
             for h in range(rowmax+2):
                 if h == rowmax+1 and i < 10:
                     print(" ",colmax - i,"", end = '')
@@ -88,12 +93,27 @@ class Data:
                 elif [h,colmax -i] == startlocation:
                     self.avaliablepath.append([h,i])
                     print("  B  ", end = '')
+                    if self.isvalid(h, colmax -i) == True and h <= rowmax and i <= colmax:
+                        templist.append(1)
+                    elif self.isvalid(h, colmax -i) == False and h <= rowmax and i <= colmax:
+                        templist.append(0)
+                       # break
                 elif [h,colmax -i] in shelflist:
                     print("  S  ", end = '')
+                    if self.isvalid(h, colmax -i) == True and h <= rowmax and i <= colmax:
+                        templist.append(0)
+
+                    elif self.isvalid(h,colmax- i) == False and h <= rowmax and i <= colmax:
+                        templist.append(1)
                 else:
-                    if [h, colmax - i] != [0,0]:
-                        self.avaliablepath.append([h,colmax - i])
+                    if [h, colmax - i] != startlocation:
+                        if self.isvalid(h, colmax-i) == True and h <= rowmax and i <= colmax:
+                            templist.append(1)
+                        elif self.isvalid(h, colmax-i) == False and h <= rowmax and i <= colmax:
+                            print("map has error . problem",h,i)
+                            templist.append(0)
                         print("  .  ", end = '')
+            self.map.append(templist)
             print('\n')
 
         for i in range(rowmax+2):
@@ -108,19 +128,35 @@ class Data:
             else:
                 print(" ",i-1," ", end = '')
 
-    def findpathtoitem1(self, productID):
-        self.currentPos_list = list()
-        self.path_graph = dict()
-        print(self.result_key)
-        print(productID)
-        for i in self.result_key.items():
-            self.currentPos_list.append([int(float(i[1]['xLocation'])), int(float(i[1]['yLocation']))])
-        print (self.currentPos_list)
-                    #temp = value
-                    # del result_key[temp]
-                #else:
-                 #   self.result_val[key] = value
 
+    def findpathtoitem1(self, productID):
+        # self.currentPos_list = list()
+        # self.path_graph = dict()
+        # print(self.result_key)
+        # print(productID)
+        # for i in self.result_key.items():
+        #     self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
+        # print (self.currentPos_list)
+        #             #temp = value
+        #             # del result_key[temp]
+        #         #else:
+        # self.isvalid(i[1]['xLocation'],i[1]['yLocation'])
+        pass
+
+
+
+    def mapsolutioncheck(self, mapsize, x, y, ):
+        pass
+
+
+
+    def isvalid(self, row, column):
+        if [row, column] in self.currentPos_list:
+            #print(True)
+            return False#
+        else:
+           # print(False)
+            return True
 
     def findpathtoitem(self, productID):
         keys = self.result_key.keys()

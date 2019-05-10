@@ -21,6 +21,6 @@ def main():
     data.printworldtemp(startlocation)
     #print("S means shelf location, B means start begin location")
     #productpick = input("Input the product id you want to pick EX: 149\n")
-    #data.findpathtoitem('149')
+    data.findpathtoitem1('149')
 
 main()
