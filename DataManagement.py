@@ -82,7 +82,7 @@ class Data:
         self.rowmax = 0
         self.colmax = 0
         self.findrowcolmax()
-        print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
+        print("Warehouse row size is: ", self.rowmax, "Warehouse column size is: ", self.colmax)
         return [self.rowmax,self.colmax]
         #print("before add", self.currentPos_list)
 
