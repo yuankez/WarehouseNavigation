@@ -6,8 +6,25 @@ import json
 import time
 from collections import defaultdict
 import collections
+#import Queue
 
 from queue import *
+
+class Queue:
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def enqueue(self, item):
+        self.items.insert(0,item)
+
+    def dequeue(self):
+        return self.items.pop()
+
+    def size(self):
+        return len(self.items)
 
 class Data:
     #global result_key,result_val
@@ -29,6 +46,7 @@ class Data:
         data = []
         count = 0
         temp = 0
+        self.totalpath = 0
         self.result_key = defaultdict(dict)
         self.result_val = {}
         # Currently in a list format with nested dictionary for every individual header
@@ -51,13 +69,22 @@ class Data:
             self.result_val.clear()
             count += 1
             #print(self.result_key)
-            if count == 100:
-               break
+            # if count == 1000:
+            #    break
         dataFile.close()
+        #print(self.result_key.keys())
         self.currentPos_list = list()
         for i in self.result_key.items():
-            self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
-        print("before add", self.currentPos_list)
+            #print(i[1])
+            if [i[1]['xLocation'], i[1]['yLocation']] not in self.currentPos_list:
+                self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
+        self.itemdict = defaultdict()
+        self.rowmax = 0
+        self.colmax = 0
+        self.findrowcolmax()
+        print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
+        return [self.rowmax,self.colmax]
+        #print("before add", self.currentPos_list)
 
         #return self.result_key
 
@@ -71,22 +98,41 @@ class Data:
             if key == product_ID:
                 print("Product: ", product_ID, "Location is: [", self.result_key[product_ID]['xLocation'],',', self.result_key[product_ID]['yLocation'],']')
 
-    def print(self):
-        print("[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n"
-              "[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n"
-              "[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]"
-              "\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]\n[3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1] \n[3, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1]")
-        print("find the path, get into it from North")
-    def printworldtemp(self, startlocation, productID):
-        self.rowmax = 0
-        self.colmax = 0
+    def inserttobackend(self, startlocation, productID, count):
+        self.count = count
+        #set max length row and column
+        self.startlocation = startlocation
+        self.itemwewant = productID
+        # associate with ID number x,y location and its direction
+        # Positions contain shelf
 
-        shelflist = list()
-        self.avaliablepath = list()
+        # find the entry location
+        self.accessdestination = self.directionclear(productID)
+
+        # find the item location
+        self.itemwewantlocation = [self.productplacex,self.productplacey]
+
+        # find row and colmax of map
+
+        # store 2-D demention Map
         self.map = list()
+        self.map = self.addinfotomap()#map[col][row]
+        self.map.reverse()
+        for i in self.map:
+            print(i)
+        self.map.reverse()
+
+        #find path to item
+        self.findpathtoitem1(startlocation,self.itemwewantlocation)
+        return self.itemwewantlocation
+        print('\n')
+           # self.printworldtemp_frontend(startlocation,productID)
+
+    def printworldtemp_frontend(self, startlocation, productID):
+
+        self.avaliablepath = list()
         #self.print()
         for key,value in self.result_key.items():
-            shelflist.append([self.result_key[key]['xLocation'], self.result_key[key]['yLocation']])
             tempy = self.result_key[key]['yLocation']
             tempx = self.result_key[key]['xLocation']
             if tempx > int(self.rowmax):
@@ -95,8 +141,6 @@ class Data:
                 self.colmax = self.result_key[key]['yLocation']
 
         print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
-
-        self.directionclear(productID)
 
         for i in range(self.colmax+1):
             templist = list()
@@ -108,132 +152,137 @@ class Data:
                 elif [h,self.colmax -i] == startlocation:
                     self.avaliablepath.append([h,i])
                     print("  B  ", end = '')
-                    if self.isvalid(h, self.colmax -i) == True and h <= self.rowmax and i <= self.colmax:
-                        templist.append(1)
-                    elif self.isvalid(h, self.colmax -i) == False and h <= self.rowmax and i <= self.colmax:
-                        raise Exception("start location on the shelf wrong")
                         # or print pick up
                        # break
-                elif [h,self.colmax -i] in shelflist:
+                elif [h,self.colmax -i] in self.currentPos_list:
                     print("  S  ", end = '')
-                    if self.isvalid(h, self.colmax -i) == True and h <= self.rowmax and i <= self.colmax:
-                        templist.append(1)
-                        print('error')
-                    elif self.isvalid(h,self.colmax- i) == False and h <= self.rowmax and i <= self.colmax:
-                        #print(h,self.colmax-i)
-                        templist.append(2)
                 else:
                     if [h, self.colmax - i] != startlocation:
-                        if self.isvalid(h, self.colmax-i) == True and h <= self.rowmax and i <= self.colmax:
-                            templist.append(1)
-                        elif self.isvalid(h, self.colmax-i) == False and h <= self.rowmax and i <= self.colmax:
-                            #print("map has error . problem",h,i)
-                            templist.append(0)
                         print("  .  ", end = '')
             self.map.append(templist)
             print('\n')
-
-        for i in range(self.rowmax+2):
-            if i == 0:
-                print("", end = '')
-            elif i == self.rowmax+1:
-                print(" ", i-1," \n")
-            elif i == self.rowmax+2:
-                break
-            elif i >= 10:
-                print("  ", i-1, end = '')
-            else:
-                print(" ",i-1," ", end = '')
-        for i in self.map:
-            print(i)
+        self.printcolumnnuber()
         time.sleep(2)
         print("=============================================================================\n")
         #self.print()
-    def printSolution(self, sol):
-        sol.reverse()
-        for i in (sol):
-            print(i)
-        print("=============================================================================\n")
-        #print(sol)
-        # for i in sol:
-        #     for j in i:
-        #         print(str(j) + " ", end="")
-        #     print("")
-
-    def findpathtoitem1(self, productID):
-         #self.directionclear(productID)
-         self.theitem = productID
-         self.path_graph = dict()
-         self.maprow = 0
-         self.mapcal = 0
-         for i in self.map:
-             self.maprow = len(i)
-             self.mapcal = self.mapcal + 1
-         sol = [[0 for j in range(self.maprow)] for i in range(self.mapcal)]
-         #print("here", sol)
-         if self.theitem == '0':
-             tempx = 0
-             tempy = 0
-         else:
-           #  print(self.theitem)
-           #  print(self.result_key)
-             tempx = self.result_key[self.theitem]['xLocation']
-             tempy = self.result_key[self.theitem]['yLocation']
-         if self.mapsolutioncheck(self.map, 0, 0, sol) == False:
-             print("Solution doesn't exist");
-             return False
-
-         self.printSolution(sol)
-         return True
-
-    def mapsolutioncheck(self, mapsize, x, y, sol):
-        countx = 0
-        for i in mapsize:
-
-            for h in i:
-                #print(self.productplacex,self.productplacey)
-                #print(h,len(i))
-                if h == self.productplacex and countx == self.productplacey:
-                    # h is x ---- row y is cal ---- count
-                    break
-            countx = countx + 1
-        if x == self.productplacex and y == self.productplacey:
-            sol[x][y] = 3
-            return True
-
-            # Check if maze[x][y] is valid
-        if self.isSafe(mapsize,x, y) == True:
-            # mark x, y as part of solution path
-            #print(x,y)
-            sol[x][y] = 2
-
-            # Move forward in x direction
-            if self.mapsolutioncheck(mapsize, x + 1, y, sol) == True:
-                return True
-
-            # If moving in x direction doesn't give solution
-            # then Move down in y direction
-            if self.mapsolutioncheck(mapsize, x, y + 1, sol) == True:
-                return True
-
-            # If none of the above movements work then
-            # BACKTRACK: unmark x, y as part of solution path
-            sol[x][y] = 0
-            return False
 
 
-    def isSafe(self, maze, x, y ):
-        #print(maze)
-        # for i in maze:
-        #     print(len(i))
-        # print(len(maze))
-        # print(self.maprow)
-        # print(x,y)
-        #print(len(maze))
-        print(maze[x][y])
-        if x >= 0 and x <= self.maprow-1 and y >= 0 and y <= self.mapcal-1 and maze[x][y] == 1:
-            return True
-        return False
+    def findpathtoitem1(self, startlocation, destination):
+        self.startlocationrow = startlocation[0]
+        self.startlocationcol = startlocation[1]
+        destinationrow = destination[0]
+        destinationcol = destination[1]
+        ##################  structure
+        self.rqueue = Queue()
+        self.cqueue = Queue()
+        self.map# using map exchange martrix size map
+            #self.visited.append(temp)
+        #print(self.map)
+
+        #variable to track the number of steps taken.
+        self.move_count = 0
+        self.nodes_left_in_layer = 1
+        self.nodes_in_next_layer = 0
+
+        #track whether the 'E' character ever gets reached during the BFS
+        self.reached_end = False
+
+        #RxC matrix of false values used to track whether the node at position (i, j) has been visited
+        self.visited = []
+        for y in range(self.colmax):
+            temp = []
+            for x in range(self.rowmax):
+                temp.append(False)
+            self.visited.append(temp)
+
+
+        self.dr = [-1, +1, 0 , 0] #direction vector for row and column
+        self.dc = [0 , 0 , +1, -1]
+
+        self.shortestpath = self.findpathtoitem1_solve()
+
+        if self.shortestpath != 'The path is not eixt':
+            self.totalpath += int(self.shortestpath)
+            if self.count == 0:
+                print("The Starting Location is ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
+                print("The Destination Location is ", "[", self.productplacex, ",", self.productplacey, "]")
+                print("The shortest path from", self.startlocation)
+                print("To Product ID: ", self.itemwewant, "Location: ", self.itemwewantlocation)
+                print("The shortest path from Starting Position", self.startlocation, "to Next Product: ", self.itemwewant,
+                      "Location: ", self.itemwewantlocation, "is", self.shortestpath)
+                print("Now it take total steps: ", self.totalpath)
+            elif self.count >= 0:
+                print("Now it keep going from ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
+                print("To the next product ID", self.itemwewant)
+                print("The next product location is ", "[", destinationrow, ",", destinationcol, "]")
+                print("The shortest path from last product", self.startlocation, "to Next Product, ID:", self.itemwewant,"location:", self.itemwewantlocation,"is",self.shortestpath)
+                print("Now it take total steps: ", self.totalpath)
+        else:
+            if self.count == 0:
+                print("The Starting Location is ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
+                print("The Destination Location is ", "[", self.productplacex, ",", self.productplacey, "]")
+                print("The shortest path from", self.startlocation)
+                print("To Product ID: ", self.itemwewant, "Location: ", self.itemwewantlocation)
+                print("self.shortestpath")
+            elif self.count >= 0:
+                print("Now it keep going from ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
+                print("To the next product ID:", self.itemwewant)
+                print("The next product location is ", "[", destinationrow, ",", destinationcol, "]")
+                print("The shortest path from last product", self.startlocation, "to Next Product: ", self.itemwewant, "Location: ", self.itemwewantlocation, "is", self.shortestpath)
+                print("Now it take total steps: ", self.totalpath, "going back")
+
+    def findpathtoitem1_solve(self):
+        self.rqueue.enqueue(self.startlocationrow)
+        self.cqueue.enqueue(self.startlocationcol)
+        #print("debugging findsolve")
+        #print(self.rqueue.size(),self.cqueue.size())
+        self.visited[self.startlocationcol][self.startlocationrow] = True
+        #print(self.map[1][2])
+        while self.rqueue.size() > 0:
+            r = self.rqueue.dequeue()
+            c = self.cqueue.dequeue()
+            #print(self.map[r][c])
+            if self.map[c][r] == 3:
+                self.reached_end = True
+                break
+
+            self.explor_neighbours(r,c)
+            self.nodes_left_in_layer -= 1
+            if self.nodes_left_in_layer == 0:
+                self.nodes_left_in_layer = self.nodes_in_next_layer
+                self.nodes_in_next_layer = 0
+                self.move_count += 1
+                #print(self.move_count)
+        if self.reached_end:
+            return self.move_count + 1 # at the front door need one more step
+        return "The path is not eixt"
+
+        pass
+
+    def explor_neighbours(self, r, c):
+        for i in range(4):
+            rr = r + self.dr[i]# rr is current row coordinate
+            cc = c + self.dc[i]#cc is current col coordinat
+            if rr < 0 or cc < 0: # rr and cc is neighbouring cell of (r,c)
+                continue
+            if rr >= self.rowmax or cc >= self.colmax:
+                continue
+
+            #skip visited locations or blocked cells
+
+            if self.visited[cc][rr]:
+                continue
+            if self.map[cc][rr] == '0':
+                continue
+
+            self.rqueue.enqueue(rr)
+            self.cqueue.enqueue(cc)
+            #print(self.rqueue.items)
+            self.visited[cc][rr] = True
+            self.nodes_in_next_layer = self.nodes_in_next_layer+1
+
+
+
 
     def directionclear(self, destination):
         for key,value in self.result_key.items():
@@ -242,43 +291,17 @@ class Data:
                 self.productplacex = self.result_key[key]['xLocation']
                 self.productplacey = self.result_key[key]['yLocation']
                 if self.result_key[key]['AccessS'] == 1:
-                    if (self.productplacex-1,self.productplacey) not in self.currentPos_list and self.productplacex-1 >= 0:
-                        self.currentPos_list.append([self.productplacex-1,self.productplacey])
-                    if (self.productplacex+1,self.productplacey) not in self.currentPos_list and self.productplacex+1 <= self.rowmax:
-                        self.currentPos_list.append([self.productplacex+1,self.productplacey])
-                    if (self.productplacex,self.productplacey+1) not in self.currentPos_list and self.productplacey+1 <= self.colmax:
-                        self.currentPos_list.append([self.productplacex,self.productplacey+1])
+                    return [self.productplacex,self.productplacey-1]
 
                 elif self.result_key[key]['AccessN'] == 1:
-                    if (self.productplacex-1,self.productplacey) not in self.currentPos_list and self.productplacex-1 >= 0:
-                        self.currentPos_list.append([self.productplacex-1,self.productplacey])
-                        #print(self.rowmax)
-                    if (self.productplacex+1,self.productplacey) not in self.currentPos_list and self.productplacex+1 <= self.rowmax:
-                        self.currentPos_list.append([self.productplacex+1, self.productplacey])
-                        #print("why not")
-
-                    if (self.productplacex,self.productplacey-1) not in self.currentPos_list and self.productplacey-1 >= 0:
-                        self.currentPos_list.append([self.productplacex,self.productplacey-1])
+                    return [self.productplacex, self.productplacey +1]
                        # print("lool")
-                    print("added successful", self.currentPos_list)
+                    #print("added successful", self.currentPos_list)
                 elif self.result_key[key]['AccessE'] == 1:
-                    if (self.productplacex-1,self.productplacey) not in self.currentPos_list and self.productplacex-1 >= 0:
-                        self.currentPos_list.append([self.productplacex-1,self.productplacey])
-                    if (self.productplacex,self.productplacey-1) not in self.currentPos_list and self.productplacey-1 >= 0:
-                        self.currentPos_list.append([self.productplacex,self.productplacey-1])
-                    if (self.productplacex,self.productplacey+1) not in self.currentPos_list and self.productplacey+1 <= self.colmax:
-                        self.currentPos_list.append([self.productplacex,self.productplacey+1])
-                    print("added successful",self.currentPos_list)
+                    return [self.productplacex+1, self.productplacey]
+                    #print("added successful",self.currentPos_list)
                 elif self.result_key[key]['AccessW'] == 1:
-                    if (self.productplacex+1,self.productplacey) not in self.currentPos_list and self.productplacex-1 >= 0:
-                        self.currentPos_list.append([self.productplacex+1,self.productplacey])
-                    if (self.productplacex,self.productplacey-1) not in self.currentPos_list and self.productplacey-1 >= 0:
-                        self.currentPos_list.append([self.productplacex,self.productplacey-1])
-                    if (self.productplacex,self.productplacey+1) not in self.currentPos_list and self.productplacey+1 <= self.colmax:
-                        self.currentPos_list.append([self.productplacex, self.productplacey+1])
-                    print("added successful",self.currentPos_list)
-
-                #self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
+                    return [self.productplacex-1, self.productplacey - 1]
 
     def isvalid(self, row, column):
         if [row, column] in self.currentPos_list:
@@ -375,6 +398,7 @@ class Data:
                 if np not in bmap or (ndist, npath) < bmap[np]:
                     bmap[np] = (ndist, npath)
                     queue.append((np, ndist, npath))
+        print(distance(ball,hole))
         return bmap[hole][1] if hole in bmap else 'impossible'
 
     def inputproductIDcheck(self, productlist):
@@ -386,40 +410,47 @@ class Data:
                 return False
         return True
 
-    """
-    def construct_graph(self):
-        path_graph = dict()
-        for position in self.avaliablepath:
-            path_graph[position] = set()
-        for key in path_graph:
-            for position in self.currentPos_list:
-                if position[0] == key[0] - 1 and position[1] == key[1]:
-                    path_graph[key].add(position)
-                elif position[0] == key[0] + 1 and position[1] == key[1]:
-                    path_graph[key].add(position)
-                elif position[0] == key[0] and position[1] == key[1] + 1:
-                    path_graph[key].add(position)
-                elif position[0] == key[0] and position[1] == key[1] - 1:
-                    path_graph[key].add(position)
-        return path_graph
-    def shortest_path(self, graph, start, goal, path=None):
-        # print(start,goal)
-        if path is None:
-            path = list()
-        path = path + [start]
-        if start == goal:
-            self.found_shorest_back = True
-            return path
-        if start not in graph:
-            return None
-        # shortest = None
-        paths = []
-        for node in graph[start]:
-            if not self.found_shorest_back:
-                if node not in path:
-                    new_path = self.shortest_path(graph, node, goal, path)
-                    for p in new_path:
-                        paths.append(p)
-        return paths
-"""
+    def printcolumnnuber(self):
+        for i in range(self.rowmax+2):
+            if i == 0:
+                print("", end = '')
+            elif i == self.rowmax+1:
+                print(" ", i-1," \n")
+            elif i == self.rowmax+2:
+                break
+            elif i >= 10:
+                print("  ", i-1, end = '')
+            else:
+                print(" ",i-1," ", end = '')
 
+    def findrowcolmax(self):
+        for key, value in self.result_key.items():
+            self.itemdict[key] = [self.result_key[key]['xLocation'], self.result_key[key]['yLocation']]
+            #print(self.itemdict)
+            tempy = self.result_key[key]['yLocation']
+            tempx = self.result_key[key]['xLocation']
+            if tempx > int(self.rowmax):
+                self.rowmax = self.result_key[key]['xLocation']
+            if tempy > int(self.colmax):
+                self.colmax = self.result_key[key]['yLocation']
+
+    def addinfotomap(self):
+        for i in range(self.colmax):
+            #print(i,"number i ")
+            templist = list()
+            for h in range(self.rowmax):
+                #print("number h",h)
+                if [h,i] == self.startlocation:
+                    #raise Exception("start location on the shelf wrong")
+                    # break
+                    templist.append(2)
+                elif [h,i] == self.accessdestination:
+                    templist.append(3)
+                    #print("check here", h,i)
+                elif [h, i] in self.currentPos_list:
+                    templist.append(0)
+                else:
+                    templist.append(1)
+            self.map.append(templist)
+        #print("look here", self.map[15][19])
+        return self.map
