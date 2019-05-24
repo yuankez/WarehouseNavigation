@@ -1,17 +1,70 @@
 from collections import defaultdict
 import DataManagement
-import WarehouseMap
+import time
+import psutil
+import os
 
+def runtestcase(testcase, startlocation, data, elapsedTime):
+    count = 0
+    start = 0
+    stopwatch_start = time.process_time()
+    # for i in testcase:
+    #     if start  > len(testcase) - 1:
+    #         break
+    #     if start == 0:
+    #         newstartlocation = data.inserttobackend(startlocation, testcase[start], count)
+    #         print(newstartlocation)
+    #     elif start > 0:
+    #         print("here")
+    #         newstartlocation = data.inserttobackend(newstartlocation, testcase[start],count)
+    #     count += 1
+    #     start += 1
+    print(data.analysisinput(testcase, startlocation))
+    stopwatch_end = time.process_time()
+    runningTime = stopwatch_end - stopwatch_start
+    #elapsedTime.append(runningTime)
+    #print("Elapsed Time of BFS :", runningTime, " seconds")
+
+def printTestCaseTime(elapsedTime, startlocation):
+    print('Running Time of BFS')
+    print('Starting Location: ', startlocation)
+    for i in range(len(elapsedTime)):
+        #print("Testcase", i + 1,"\t", elapsedTime[i], " seconds")
+        print(elapsedTime[i])
+
+def printMemoryUsage():
+    # Prints Memory Usage: using psutil
+    # In print statement look at used=
+    # Only run one testcase at a time
+    # print(psutil.virtual_memory())
+    print('PID For User Control:', os.getpid())
+    process = psutil.Process(os.getpid())   # get mem
+    print(process.memory_info().rss)
+
+
+def takealistoforder(inputlistoforder):
+    filename = "" + inputlistoforder
+    dataFile = open(filename, 'r')
+    count = 1
+    listdict = dict()
+    for line in dataFile:
+        temp = line.split()
+        listdict[count] = temp
+        count+=1
+    print(listdict)
+    pass
 def main():
     # Accept file path
     data = DataManagement.Data()
-    board = WarehouseMap.Map()
     #datafile = input("please give a valid data file to input!\n")
     #/Users/Yuank/Desktop/WarehouseNavigation/qvBox-warehouse-data-s19-v01.txt
     rowcolmax = []
-    rowcolmax = data.inputdata("/Users/Yuank/Desktop/WarehouseNavigation/qvBox-warehouse-data-s19-v01.txt")
+    rowcolmax = data.inputdata("qvBox-warehouse-data-s19-v01.txt")
     #itemcheck = input("Input the product id you want to check\n")
+    inputlistoforder = input("please input the order list path you want: EX: qvBox-warehouse-orders-list-part01.txt")
+    inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
 
+    orderlist = takealistoforder(inputlistoforder)
     #because of the huge database, for now only print one item
     #data.finditemsinformation('1')
     print("The Input of row and col length is", rowcolmax[0]-1, rowcolmax[1]-1)
@@ -32,9 +85,11 @@ def main():
 
     count = 0
     #data.inserttobackend([0,0], '149',count)
+    elapsedTime = []
 
     #startlocation = input("where you want to start")
-    print(data.analysisinput(testcase2,startlocation))
+
+    runtestcase(testcase3, startlocation, data, elapsedTime)
     # start = 0
     # for i in testcase4:
     #     if start  > len(testcase2) - 1:
@@ -57,5 +112,6 @@ def main():
     #     data.printworldtemp( startlocation, productpick)
         #data.findpathtoitem1(i)
 
-
+    printTestCaseTime(elapsedTime, startlocation)
+    printMemoryUsage()
 main()

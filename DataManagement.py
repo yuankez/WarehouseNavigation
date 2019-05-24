@@ -50,6 +50,7 @@ class Data:
         self.totalpath = 0
         self.result_key = defaultdict(dict)
         self.result_val = {}
+
         # Currently in a list format with nested dictionary for every individual header
         for line in dataFile:
             col = line.strip().split('\t')
@@ -70,8 +71,8 @@ class Data:
             self.result_val.clear()
             count += 1
             #print(self.result_key)
-            # if count == 1000:
-            #    break
+            # if count == 50:
+            #     break
         dataFile.close()
         #print(self.result_key.keys())
         self.currentPos_list = list()
@@ -101,6 +102,7 @@ class Data:
 
     def analysisinput(self, itemslist,startlocation):
         self.storpath = []
+        self.pathlist = []
         self.itemslist = itemslist
         self.primelist = list(permutations(self.itemslist, len(self.itemslist)))
         self.pathdict = defaultdict()
@@ -130,6 +132,12 @@ class Data:
                  realshortest = i
              elif i <= realshortest:
                  realshortest = i
+        self.draftmapprinting()
+
+        pathlist = self.putresultpath()
+        map2 = self.addinfotomap2(pathlist)
+        self.printworldtemp_frontend2(map2)
+
         return ("The shortest path is: ", realshortest)
 
 
@@ -168,8 +176,9 @@ class Data:
 
         #find path to item
         self.path = self.findpathtoitem1(startlocation,self.itemwewantlocation)
-        if self.path != 'The path is not eixt':
-            self.totalpath += int(self.path)
+        if self.path[0] != 'The path is not eixt':
+            self.totalpath += int(self.path[0])
+            self.pathlist.append(self.path[1])
         #return self.itemwewantlocation
         #print('\n')
            # self.printworldtemp_frontend(startlocation,productID)
@@ -177,6 +186,7 @@ class Data:
             self.storpath.append([startlocation, [self.itemwewant, self.path]])
         else:
             self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
+
 
         #print(self.storpath)
 
@@ -188,105 +198,81 @@ class Data:
         ##################  structure
         self.rqueue = Queue()
         self.cqueue = Queue()
-        self.map# using map exchange martrix size map
-            #self.visited.append(temp)
-        #print(self.map)
+        self.map  # using map exchange martrix size map
+        # self.visited.append(temp)
+        # print(self.map)
+        self.node_parent = {}
+        self.path = []
+        # use to store the shortest path
 
-        #variable to track the number of steps taken.
+        # variable to track the number of steps taken.
         self.move_count = 0
         self.nodes_left_in_layer = 1
         self.nodes_in_next_layer = 0
 
-        #track whether the 'E' character ever gets reached during the BFS
+        # track whether the 'E' character ever gets reached during the BFS
         self.reached_end = False
 
-        #RxC matrix of false values used to track whether the node at position (i, j) has been visited
+        # RxC matrix of false values used to track whether the node at position (i, j) has been visited
         self.visited = []
-        if len(self.storpath)>0:
-            for key in self.storpath:
-                if key[0] == self.itemwepreviouswant and key[1][0] == self.itemwewant:
-                    return key[1][1]
-                else:
-                    pass
-
         for y in range(self.colmax):
             temp = []
             for x in range(self.rowmax):
                 temp.append(False)
             self.visited.append(temp)
 
-
-        self.dr = [-1, +1, 0 , 0] #direction vector for row and column
-        self.dc = [0 , 0 , +1, -1]
+        self.dr = [-1, +1, 0, 0]  # direction vector for row and column
+        self.dc = [0, 0, +1, -1]
 
         self.shortestpath = self.findpathtoitem1_solve()
-        return self.shortestpath
-        #     if self.count == 0:
-        #         print("The Starting Location is ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
-        #         print("The Destination Location is ", "[", self.productplacex, ",", self.productplacey, "]")
-        #         print("The shortest path from", self.startlocation)
-        #         print("To Product ID: ", self.itemwewant, "Location: ", self.itemwewantlocation)
-        #         print("The shortest path from Starting Position", self.startlocation, "to Next Product: ", self.itemwewant,
-        #               "Location: ", self.itemwewantlocation, "is", self.shortestpath)
-        #         print("Now it take total steps: ", self.totalpath)
-        #     elif self.count >= 0:
-        #         print("Now it keep going from ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
-        #         print("To the next product ID", self.itemwewant)
-        #         print("The next product location is ", "[", destinationrow, ",", destinationcol, "]")
-        #         print("The shortest path from last product", self.startlocation, "to Next Product, ID:", self.itemwewant,"location:", self.itemwewantlocation,"is",self.shortestpath)
-        #         print("Now it take total steps: ", self.totalpath)
-        # else:
-        #     if self.count == 0:
-        #         print("The Starting Location is ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
-        #         print("The Destination Location is ", "[", self.productplacex, ",", self.productplacey, "]")
-        #         print("The shortest path from", self.startlocation)
-        #         print("To Product ID: ", self.itemwewant, "Location: ", self.itemwewantlocation)
-        #         print("self.shortestpath")
-        #     elif self.count >= 0:
-        #         print("Now it keep going from ", "[", self.startlocationrow, ",", self.startlocationcol, "]")
-        #         print("To the next product ID:", self.itemwewant)
-        #         print("The next product location is ", "[", destinationrow, ",", destinationcol, "]")
-        #         print("The shortest path from last product", self.startlocation, "to Next Product: ", self.itemwewant, "Location: ", self.itemwewantlocation, "is", self.shortestpath)
-        #         print("Now it take total steps: ", self.totalpath, "going back")
+       # print(self.shortestpath, "I am here")
+
+        if self.shortestpath != 'The path is not eixt':
+            # self.totalpath += self.shortestpath
+            return [self.shortestpath, self.path]
+        else:
+            raise ValueError('The path is not eixt')
+            return 0
 
     def findpathtoitem1_solve(self):
         self.rqueue.enqueue(self.startlocationrow)
         self.cqueue.enqueue(self.startlocationcol)
-        #print("debugging findsolve")
-        #print(self.rqueue.size(),self.cqueue.size())
+        # print("debugging findsolve")
+        # print(self.rqueue.size(),self.cqueue.size())
         self.visited[self.startlocationcol][self.startlocationrow] = True
-        #print(self.map[1][2])
+        # print(self.map[1][2])
         while self.rqueue.size() > 0:
             r = self.rqueue.dequeue()
             c = self.cqueue.dequeue()
-            #print(self.map[r][c])
+            # print(self.map[r][c])
             if self.map[c][r] == 3:
                 self.reached_end = True
+                self.backtrack(r, c)  # find the path
                 break
 
-            self.explor_neighbours(r,c)
+            self.explor_neighbours(r, c)
             self.nodes_left_in_layer -= 1
             if self.nodes_left_in_layer == 0:
                 self.nodes_left_in_layer = self.nodes_in_next_layer
                 self.nodes_in_next_layer = 0
                 self.move_count += 1
-                #print(self.move_count)
+                # print(self.move_count)
         if self.reached_end:
-            return self.move_count + 1 # at the front door need one more step
+            return self.move_count + 1  # at the front door need one more step
         return "The path is not eixt"
 
         pass
 
     def explor_neighbours(self, r, c):
         for i in range(4):
-            rr = r + self.dr[i]# rr is current row coordinate
-            cc = c + self.dc[i]#cc is current col coordinat
-            if rr < 0 or cc < 0: # rr and cc is neighbouring cell of (r,c)
+            rr = r + self.dr[i]  # rr is current row coordinate
+            cc = c + self.dc[i]  # cc is current col coordinat
+            if rr < 0 or cc < 0:  # rr and cc is neighbouring cell of (r,c)
                 continue
             if rr >= self.rowmax or cc >= self.colmax:
                 continue
 
-            #skip visited locations or blocked cells
+            # skip visited locations or blocked cells
 
             if self.visited[cc][rr]:
                 continue
@@ -295,10 +281,24 @@ class Data:
 
             self.rqueue.enqueue(rr)
             self.cqueue.enqueue(cc)
-            #print(self.rqueue.items)
+            # print(self.rqueue.items)
             self.visited[cc][rr] = True
-            self.nodes_in_next_layer = self.nodes_in_next_layer+1
+            self.node_parent[(cc, rr)] = (c, r)
+            self.nodes_in_next_layer = self.nodes_in_next_layer + 1
 
+    def backtrack(self, r, c):
+        pr, pc = r, c
+        while pr != self.startlocationrow or pc != self.startlocationcol:
+            # print(pr,pc)
+            self.path.append((pc, pr))
+            # print("append",(pc,pr))
+            pc, pr = self.node_parent[(pc, pr)]
+            # print("parent,",(pc,pr))
+        # print(self.node_parent)
+        # print(pc,pr)
+        # print(self.startlocationrow,self.startlocationcol)
+        self.path.append((pc, pr))
+        self.path.reverse()
 
 
 
@@ -475,3 +475,82 @@ class Data:
         print("\n")
         print("=============================================================================\n")
         # self.print()
+    def draftmapprinting(self):
+        # store 2-D demention Map
+        self.map.reverse()
+        for i in self.map:
+            #print(i)
+            pass
+        self.map.reverse()
+
+    def putresultpath(self):
+        resultlist = []
+        for i in self.pathlist:
+            for g in i:
+                resultlist.append(g)
+        return resultlist
+
+    def addinfotomap2(self,resultlist):
+        map2 = []
+        #print(resultlist)
+        #print([1,2] in resultlist)
+        for i in range(self.colmax):
+            # print(i,"number i ")
+            templist = list()
+            for h in range(self.rowmax):
+                # print("number h",h)
+                if [h, i] == self.startlocation:
+                    # raise Exception("start location on the shelf wrong")
+                    # break
+                    templist.append(2)
+                elif [h,i] == self.accessdestination:
+                    templist.append(3)
+                elif (i,h) in resultlist:
+                    templist.append(5)
+                elif [h, i] == self.itemwewantlocation:
+                    templist.append(4)
+                    # print("check here", h,i)
+                elif [h, i] in self.currentPos_list:
+                    templist.append(0)
+                else:
+                    templist.append(1)
+            print(templist)
+            map2.append(templist)
+        # print("look here", self.map[15][19])
+        return map2
+
+
+    def printworldtemp_frontend2(self,map2):
+        count_number = 0
+        map2.reverse()
+        for y in map2:
+            templist = list()
+            for x in y:
+
+                if x == 1:
+                    print(" . ", end='')
+                elif x == 0:
+                    print(" S ", end='')
+                    # or print pick up
+                    # break
+                elif x == 2:
+                    print(" B ", end='')
+                elif x == 3:
+                    print(" O ", end='')
+                elif x == 4:
+                    print(" D ", end='')
+                elif x == 5:
+                    print(" O ", end='')
+            print(self.colmax - 1 - count_number)
+            count_number += 1
+            print("\n")
+        for i in range(self.rowmax):
+            if i < 10:
+                print("", i, "", end='')
+            elif i == 10:
+                print("", i, "", end='')
+            else:
+                print("",i, end='')
+        time.sleep(1)
+        print("\n")
+        print("=============================================================================\n")
