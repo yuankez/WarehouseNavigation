@@ -23,10 +23,10 @@ def main():
     # or input by user
     #testcaseold = ['1','108335', '340367']
     testcase1 = ['1']
-    testcase2 = ['102', '219', '302','626', '670'] #upgoing
-    testcase3 = ['1','1520','1387', '1355','1045', '1025', '670','626', '302', '219', '102']#desecending order
+    testcase2 = ['108335'] #upgoing
+    testcase3 = ['1','1520','1387', '1355','1045', '670']#desecending order
     testcase4 = ['1520','1387', '1958','2010','1355','1045','2029', '2826', '2947','1025', '670','626', '302', '219', '102']#random order
-    testcase5 = ['1','74','45','102','149']# xlocation bump back and force
+    testcase5 = ['1','74','45','102','149','670']# xlocation bump back and force
     testcase6 = ['1','74','102','102','149']# try to pick up same item twice
     testcase7 = ['1','74','102','103','149']#one of item not exit '103'
 
@@ -34,19 +34,19 @@ def main():
     #data.inserttobackend([0,0], '149',count)
 
     #startlocation = input("where you want to start")
-
-    start = 0
-    for i in testcase4:
-        if start  > len(testcase4) - 1:
-            break
-        if start == 0:
-            newstartlocation = data.inserttobackend(startlocation, testcase4[start], count)
-            print(newstartlocation)
-        elif start > 0:
-            print("here")
-            newstartlocation = data.inserttobackend(newstartlocation, testcase4[start],count)
-        count += 1
-        start += 1
+    print(data.analysisinput(testcase2,startlocation))
+    # start = 0
+    # for i in testcase4:
+    #     if start  > len(testcase2) - 1:
+    #         break
+    #     if start == 0:
+    #         newstartlocation = data.inserttobackend(startlocation, testcase2[start], count)
+    #         print(newstartlocation)
+    #     elif start > 0:
+    #         #print("here")
+    #         newstartlocation = data.inserttobackend(newstartlocation, testcase2[start],count)
+    #     count += 1
+    #     start += 1
 
 
     #print("S means shelf location, B means start begin location")
