@@ -51,7 +51,8 @@ def takealistoforder(inputlistoforder):
         temp = line.split()
         listdict[count] = temp
         count+=1
-    print(listdict)
+    print(listdict[1])
+    return listdict
     pass
 def main():
     # Accept file path
@@ -68,9 +69,14 @@ def main():
     #because of the huge database, for now only print one item
     #data.finditemsinformation('1')
     print("The Input of row and col length is", rowcolmax[0]-1, rowcolmax[1]-1)
-    startlocationrow = input("Please the start location row number, the row max input is: ")
-    startlocationcal = input("Please the start location col number, the col max input is: ")
+    startlocationrow = input("Please the start location row number: " )
+    startlocationcal = input("Please the start location col number: " )
     startlocation = [int(startlocationrow),int(startlocationcal)]
+
+    orderlistnumber = int(input("pleast input which order list number you want to choose: EX: 1 "))
+    testcase = orderlist[int(orderlistnumber)]
+    del orderlist[int(orderlistnumber)]
+
     #productpick = '149'
     #productpick = input("Input the product id you want to pick EX: 149\n")
     # or input by user
@@ -89,7 +95,8 @@ def main():
 
     #startlocation = input("where you want to start")
 
-    runtestcase(testcase3, startlocation, data, elapsedTime)
+    runtestcase(testcase, startlocation, data, elapsedTime)
+
     # start = 0
     # for i in testcase4:
     #     if start  > len(testcase2) - 1:
@@ -114,4 +121,31 @@ def main():
 
     printTestCaseTime(elapsedTime, startlocation)
     printMemoryUsage()
+    templist = []
+    templist2= orderlist.keys()
+    templist = []
+    for i in templist2:
+        templist.append(i)
+    for i in range(len(orderlist)):
+        temp = input("Please input next order list to pick the next one: EX, Next or 2")
+        if temp == 'next':
+            orderlistnumber = orderlistnumber+1
+            while(1):
+                if orderlistnumber in templist:
+                    break
+                elif orderlistnumber >= len(templist):
+                    break
+                else:
+                    orderlistnumber = orderlistnumber + 1
+            runtestcase(orderlist[orderlistnumber], startlocation, data, elapsedTime)
+            del orderlist[int(orderlistnumber)]
+            templist.remove(orderlistnumber)
+        elif temp == 'exit':
+            print("Pick up has been stoped")
+            break
+        else:
+            orderlistnumber = temp
+            runtestcase(orderlist[int(orderlistnumber)], startlocation, data, elapsedTime)
+            del orderlist[int(orderlistnumber)]
+            templist.remove(orderlistnumber)
 main()

@@ -329,59 +329,6 @@ class Data:
            # print(False)
             return True
 
-    def findpathtoitem(self, productID):
-        keys = self.result_key.keys()
-        aimproduct = dict()
-        currentlocation = [0,0]
-        movehistory = list()
-        movehistory.append(currentlocation)
-        if productID not in keys:
-            print("Database does not have this item. Input Over")
-        for key,value in self.result_key.items():
-            if key == productID:
-                aimproduct[key] = value
-        aimproductlocation = [aimproduct[productID]['xLocation'], aimproduct[productID]['yLocation']]
-        print("start location: [0,0] ")
-        time.sleep(1)
-        print("product want to pick:", productID, "product location: ", aimproductlocation)
-        time.sleep(1)
-
-
-
-        print("Robot facing to left")
-
-
-
-        for i in range(int(aimproductlocation[0])):
-            if (int(aimproductlocation[0]) - int(currentlocation[0])) >= 0:
-                currentlocation = [int(currentlocation[0])+1, int(currentlocation[1])]
-                movehistory.append(currentlocation)
-                time.sleep(1)
-                print("Robot Moved Forward. Location now:", currentlocation)
-        print("Robot turning left:")
-        time.sleep(1)
-        print("Robot moving up:")
-        time.sleep(1)
-
-
-        for h in range(int(aimproductlocation[1])):
-            if (int(aimproductlocation[1]) - int(currentlocation[1])) >= 0:
-                currentlocation = [int(currentlocation[0]), int(currentlocation[1])+1]
-                movehistory.append(currentlocation)
-                time.sleep(1)
-                print("Robot Moved Forward. Location now:", currentlocation)
-        if(currentlocation[0] == int(aimproductlocation[0]) and currentlocation[1] == int(aimproductlocation[1])):
-            time.sleep(1)
-            print("found the item! Pick it back!")
-            time.sleep(1)
-            check = input("If want to check the move history type yes, exit type no")
-            if check == 'yes':
-                print(movehistory)
-            else:
-                print("over")
-        else:
-            print('error, cant find the item')
-
 
     def inputproductIDcheck(self, productlist):
         templist = list()
@@ -507,14 +454,14 @@ class Data:
                     templist.append(3)
                 elif (i,h) in resultlist:
                     templist.append(5)
+                elif [h, i] in self.currentPos_list:
+                    templist.append(0)
                 elif [h, i] == self.itemwewantlocation:
                     templist.append(4)
                     # print("check here", h,i)
-                elif [h, i] in self.currentPos_list:
-                    templist.append(0)
                 else:
                     templist.append(1)
-            print(templist)
+            #print(templist)
             map2.append(templist)
         # print("look here", self.map[15][19])
         return map2
@@ -543,7 +490,6 @@ class Data:
                     print(" O ", end='')
             print(self.colmax - 1 - count_number)
             count_number += 1
-            print("\n")
         for i in range(self.rowmax):
             if i < 10:
                 print("", i, "", end='')
