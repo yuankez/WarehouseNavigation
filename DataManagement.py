@@ -77,23 +77,26 @@ class Data:
         #print(self.result_key.keys())
         self.currentPos_list = list()
         for i in self.result_key.items():
-            #print(i[1])
             if [i[1]['xLocation'], i[1]['yLocation']] not in self.currentPos_list:
                 self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
         self.itemdict = defaultdict()
         self.rowmax = 0
         self.colmax = 0
         self.findrowcolmax()
+
+        # store 2-D demention Map
+        self.map = self.addinfotomap()#map[col][row]
+        self.map.reverse()
+        self.printworldtemp_frontend()
+        self.map.reverse()
+
         print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
         return [self.rowmax,self.colmax]
-        #print("before add", self.currentPos_list)
 
         #return self.result_key
 
     def finditemsinformation(self, product_ID):
         keys = self.result_key.keys()
-        #print(self.result_key)
-        #print(self.result_key[product_ID])
         if product_ID not in keys:
             print("Database does not have this item. Input Over")
         for key,value in self.result_key.items():
@@ -107,42 +110,50 @@ class Data:
         self.primelist = list(permutations(self.itemslist, len(self.itemslist)))
         self.pathdict = defaultdict()
         self.startlocation = startlocation
-        self.count = 0
+        count = 0
         printmap = 0
         self.totalpathlist = []
-        #print(self.primelist)
         self.itemwepreviouswant = 0
+        self.mapstore = []
+
         for prime in self.primelist:
             for item in prime:
-                if self.count == 0:
-                    self.inserttobackend(startlocation,item,printmap)
+                if count == 0:
+                    self.startlocation = startlocation
+                    self.startlocation = self.inserttobackend(self.startlocation,item,count)
+                    #print("The starting location",self.startlocation)
                     self.itemwepreviouswant = item
                 else:
-                    self.inserttobackend(self.itemwewantlocation,item,printmap)
+                    self.startlocation = self.inserttobackend(self.startlocation, item, count)
                     self.itemwepreviouswant = item
-                self.count += 1
+
+                count += 1
                 printmap += 1
-            self.count = 0
+            self.mapstore.append([self.totalpath, self.map])
+            count = 0
             self.totalpathlist.append(self.totalpath)
+            self.addinfotomap()
             self.totalpath = 0
-            #print(self.totalpathlist)
+            self.itemwepreviouswant = 0
+            self.startlocation = startlocation
+
         realshortest = 0
         for i in self.totalpathlist:
              if realshortest == 0:
                  realshortest = i
              elif i <= realshortest:
                  realshortest = i
-        self.draftmapprinting()
 
         pathlist = self.putresultpath()
         map2 = self.addinfotomap2(pathlist)
+        #self.printworldtemp_frontend2(self.mapstore)
         self.printworldtemp_frontend2(map2)
 
         return ("The shortest path is: ", realshortest)
 
 
-    def inserttobackend(self, startlocation, productID,counts):
-        #self.count = count
+    def inserttobackend(self, startlocation, productID, counts):
+
         #set max length row and column
         self.itemwewant = productID
         # associate with ID number x,y location and its direction
@@ -155,40 +166,23 @@ class Data:
         self.itemwewantlocation = [self.productplacex,self.productplacey]
 
         # find row and colmax of map
-
-        # store 2-D demention Map
-        self.map = list()
-        self.map = self.addinfotomap()#map[col][row]
-        self.map.reverse()
-
-        colnumber = 0
-        templist = []
-        # for i in self.map:
-        #     print(i, self.colmax-colnumber)
-        #     colnumber += 1
-        # for i in range(self.rowmax):
-        #     templist.append(i)
-        # print(templist)
-        ##################################################put it back later
-        if counts == 0:
-            self.printworldtemp_frontend()
-        self.map.reverse()
+        self.changemapinfo()
 
         #find path to item
         self.path = self.findpathtoitem1(startlocation,self.itemwewantlocation)
         if self.path[0] != 'The path is not eixt':
             self.totalpath += int(self.path[0])
             self.pathlist.append(self.path[1])
+        #print(self.pathlist)
         #return self.itemwewantlocation
         #print('\n')
            # self.printworldtemp_frontend(startlocation,productID)
-        if self.count == 0:
+        if counts == 0:
             self.storpath.append([startlocation, [self.itemwewant, self.path]])
         else:
             self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
 
-
-        #print(self.storpath)
+        return self.itemwewantlocation
 
     def findpathtoitem1(self, startlocation, destination):
         self.startlocationrow = startlocation[0]
@@ -237,14 +231,10 @@ class Data:
     def findpathtoitem1_solve(self):
         self.rqueue.enqueue(self.startlocationrow)
         self.cqueue.enqueue(self.startlocationcol)
-        # print("debugging findsolve")
-        # print(self.rqueue.size(),self.cqueue.size())
         self.visited[self.startlocationcol][self.startlocationrow] = True
-        # print(self.map[1][2])
         while self.rqueue.size() > 0:
             r = self.rqueue.dequeue()
             c = self.cqueue.dequeue()
-            # print(self.map[r][c])
             if self.map[c][r] == 3:
                 self.reached_end = True
                 self.backtrack(r, c)  # find the path
@@ -256,7 +246,6 @@ class Data:
                 self.nodes_left_in_layer = self.nodes_in_next_layer
                 self.nodes_in_next_layer = 0
                 self.move_count += 1
-                # print(self.move_count)
         if self.reached_end:
             return self.move_count + 1  # at the front door need one more step
         return "The path is not eixt"
@@ -276,12 +265,11 @@ class Data:
 
             if self.visited[cc][rr]:
                 continue
-            if self.map[cc][rr] == '0':
+            if self.map[cc][rr] == 0:
                 continue
 
             self.rqueue.enqueue(rr)
             self.cqueue.enqueue(cc)
-            # print(self.rqueue.items)
             self.visited[cc][rr] = True
             self.node_parent[(cc, rr)] = (c, r)
             self.nodes_in_next_layer = self.nodes_in_next_layer + 1
@@ -290,14 +278,14 @@ class Data:
         pr, pc = r, c
         while pr != self.startlocationrow or pc != self.startlocationcol:
             # print(pr,pc)
-            self.path.append((pc, pr))
+            self.path.append((pr, pc))
             # print("append",(pc,pr))
             pc, pr = self.node_parent[(pc, pr)]
             # print("parent,",(pc,pr))
         # print(self.node_parent)
         # print(pc,pr)
         # print(self.startlocationrow,self.startlocationcol)
-        self.path.append((pc, pr))
+        self.path.append((pr, pc))
         self.path.reverse()
 
 
@@ -313,21 +301,10 @@ class Data:
 
                 elif self.result_key[key]['AccessN'] == 1:
                     return [self.productplacex, self.productplacey +1]
-                       # print("lool")
-                    #print("added successful", self.currentPos_list)
                 elif self.result_key[key]['AccessE'] == 1:
                     return [self.productplacex+1, self.productplacey]
-                    #print("added successful",self.currentPos_list)
                 elif self.result_key[key]['AccessW'] == 1:
                     return [self.productplacex-1, self.productplacey - 1]
-
-    def isvalid(self, row, column):
-        if [row, column] in self.currentPos_list:
-            #print(True)
-            return False#
-        else:
-           # print(False)
-            return True
 
 
     def inputproductIDcheck(self, productlist):
@@ -364,27 +341,34 @@ class Data:
                 self.colmax = self.result_key[key]['yLocation']
 
     def addinfotomap(self):
+        self.map = list()
         for i in range(self.colmax):
-            #print(i,"number i ")
             templist = list()
             for h in range(self.rowmax):
                 #print("number h",h)
-                if [h,i] == self.startlocation:
-                    #raise Exception("start location on the shelf wrong")
-                    # break
-                    templist.append(2)
-                elif [h,i] == self.accessdestination:
-                    templist.append(3)
-                elif [h,i] == self.itemwewantlocation:
-                    templist.append(4)
+                # if [h,i] == self.startlocation:
+                #     #raise Exception("start location on the shelf wrong")
+                #     # break
+                #     templist.append(2)
+                # elif [h,i] == self.accessdestination:
+                #     templist.append(3)
+                # elif [h,i] == self.itemwewantlocation:
+                #     templist.append(4)
                     #print("check here", h,i)
-                elif [h, i] in self.currentPos_list:
+                if [h, i] in self.currentPos_list:
                     templist.append(0)
                 else:
                     templist.append(1)
             self.map.append(templist)
         #print("look here", self.map[15][19])
         return self.map
+
+    def changemapinfo(self):
+        self.map[self.startlocation[1]][self.startlocation[0]] = 2
+        self.map[self.accessdestination[1]][self.accessdestination[0]] = 3
+        self.map[self.itemwewantlocation[1]][self.itemwewantlocation[0]] = 4
+
+
 
     def printworldtemp_frontend(self):
 
@@ -422,22 +406,17 @@ class Data:
         print("\n")
         print("=============================================================================\n")
         # self.print()
-    def draftmapprinting(self):
-        # store 2-D demention Map
-        self.map.reverse()
-        for i in self.map:
-            #print(i)
-            pass
-        self.map.reverse()
 
     def putresultpath(self):
         resultlist = []
         for i in self.pathlist:
             for g in i:
+                #print(g)
                 resultlist.append(g)
         return resultlist
 
     def addinfotomap2(self,resultlist):
+        print("final path list:", resultlist)
         map2 = []
         #print(resultlist)
         #print([1,2] in resultlist)
@@ -452,7 +431,7 @@ class Data:
                     templist.append(2)
                 elif [h,i] == self.accessdestination:
                     templist.append(3)
-                elif (i,h) in resultlist:
+                elif (h,i) in resultlist:
                     templist.append(5)
                 elif [h, i] in self.currentPos_list:
                     templist.append(0)
@@ -467,7 +446,47 @@ class Data:
         return map2
 
 
-    def printworldtemp_frontend2(self,map2):
+    # def printworldtemp_frontend2(self, mapstore):
+    #     count_number = 0
+    #     findshortes = 10000000
+    #     map2 = list()
+    #     for key in mapstore:
+    #         if key[0] <= findshortes:
+    #             findshortes = key[0]
+    #             map2 = key[1]
+    #     map2.reverse()
+    #     for y in map2:
+    #         templist = list()
+    #         for x in y:
+    #
+    #             if x == 1:
+    #                 print(" . ", end='')
+    #             elif x == 0:
+    #                 print(" S ", end='')
+    #                 # or print pick up
+    #                 # break
+    #             elif x == 2:
+    #                 print(" B ", end='')
+    #             elif x == 3:
+    #                 print(" O ", end='')
+    #             elif x == 4:
+    #                 print(" D ", end='')
+    #             elif x == 5:
+    #                 print(" O ", end='')
+    #         print(self.colmax - 1 - count_number)
+    #         count_number += 1
+    #     for i in range(self.rowmax):
+    #
+    #         if i < 10:
+    #             print("", i, "", end='')
+    #         elif i == 10:
+    #             print("", i, "", end='')
+    #         else:
+    #             print("",i, end='')
+    #     time.sleep(1)
+    #     print("\n")
+    #     print("=============================================================================\n")
+    def printworldtemp_frontend2(self, map2):
         count_number = 0
         map2.reverse()
         for y in map2:
@@ -491,6 +510,7 @@ class Data:
             print(self.colmax - 1 - count_number)
             count_number += 1
         for i in range(self.rowmax):
+
             if i < 10:
                 print("", i, "", end='')
             elif i == 10:
