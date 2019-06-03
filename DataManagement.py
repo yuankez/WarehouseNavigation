@@ -80,7 +80,7 @@ class Data:
             if [i[1]['xLocation'], i[1]['yLocation']] not in self.currentPos_list:
                 self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
         self.itemdict = defaultdict()
-        self.rowmax = 0
+        self.rowmax = 00
         self.colmax = 0
         self.findrowcolmax()
 
@@ -117,27 +117,33 @@ class Data:
         self.mapstore = []
 
         for prime in self.primelist:
+            #print("This time prime:", prime)
             for item in prime:
                 if count == 0:
                     self.startlocation = startlocation
                     self.startlocation = self.inserttobackend(self.startlocation,item,count)
+             #print(self.startlocation)
                     #print("The starting location",self.startlocation)
                     self.itemwepreviouswant = item
                 else:
+                    #print("get here or not",self.startlocation,item)
                     self.startlocation = self.inserttobackend(self.startlocation, item, count)
                     self.itemwepreviouswant = item
+                #print("now we have total path in EACH PRIME", self.totalpath)
 
                 count += 1
                 printmap += 1
-            self.mapstore.append([self.totalpath, self.map])
+            #self.mapstore.append([self.totalpath, self.map])
             count = 0
+            #print("now we have total path", self.totalpath)
             self.totalpathlist.append(self.totalpath)
-            self.addinfotomap()
+            self.map = self.addinfotomap()
             self.totalpath = 0
             self.itemwepreviouswant = 0
             self.startlocation = startlocation
 
         realshortest = 0
+        #print(self.totalpathlist)
         for i in self.totalpathlist:
              if realshortest == 0:
                  realshortest = i
@@ -160,20 +166,22 @@ class Data:
         # Positions contain shelf
 
         # find the entry location
-        self.accessdestination = self.directionclear(productID)
+        #self.accessdestination = self.directionclear(productID)
 
+        destination_entry = self.changemapinfo(productID, startlocation)
+
+        self.accessdestination = destination_entry[1]
         # find the item location
-        self.itemwewantlocation = [self.productplacex,self.productplacey]
+        self.itemwewantlocation = destination_entry[0]#[self.productplacex,self.productplacey]
 
-        # find row and colmax of map
-        self.changemapinfo()
 
         #find path to item
-        self.path = self.findpathtoitem1(startlocation,self.itemwewantlocation)
+        self.path = self.findpathtoitem1(startlocation, self.itemwewantlocation)
         if self.path[0] != 'The path is not eixt':
-            self.totalpath += int(self.path[0])
+            #self.totalpath += int(self.path[0])
+            #print(self.totalpath)
             self.pathlist.append(self.path[1])
-        #print(self.pathlist)
+        #print(self.pathlist)# change it to a key associate path list which
         #return self.itemwewantlocation
         #print('\n')
            # self.printworldtemp_frontend(startlocation,productID)
@@ -181,6 +189,9 @@ class Data:
             self.storpath.append([startlocation, [self.itemwewant, self.path]])
         else:
             self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
+
+        self.map[self.accessdestination[1]][self.accessdestination[0]] = 1
+
 
         return self.itemwewantlocation
 
@@ -218,12 +229,12 @@ class Data:
         self.dr = [-1, +1, 0, 0]  # direction vector for row and column
         self.dc = [0, 0, +1, -1]
 
-        self.shortestpath = self.findpathtoitem1_solve()
+        shortestpath = self.findpathtoitem1_solve()
        # print(self.shortestpath, "I am here")
 
-        if self.shortestpath != 'The path is not eixt':
-            # self.totalpath += self.shortestpath
-            return [self.shortestpath, self.path]
+        if shortestpath != 'The path is not eixt':
+            self.totalpath += shortestpath
+            return [shortestpath, self.path]
         else:
             raise ValueError('The path is not eixt')
             return 0
@@ -290,21 +301,22 @@ class Data:
 
 
 
-    def directionclear(self, destination):
-        for key,value in self.result_key.items():
-
-            if key == destination:
-                self.productplacex = self.result_key[key]['xLocation']
-                self.productplacey = self.result_key[key]['yLocation']
-                if self.result_key[key]['AccessS'] == 1:
-                    return [self.productplacex,self.productplacey-1]
-
-                elif self.result_key[key]['AccessN'] == 1:
-                    return [self.productplacex, self.productplacey +1]
-                elif self.result_key[key]['AccessE'] == 1:
-                    return [self.productplacex+1, self.productplacey]
-                elif self.result_key[key]['AccessW'] == 1:
-                    return [self.productplacex-1, self.productplacey - 1]
+    #
+    # def directionclear(self, destination):
+    #     for key,value in self.result_key.items():
+    #
+    #         if key == destination:
+    #             self.productplacex = self.result_key[key]['xLocation']
+    #             self.productplacey = self.result_key[key]['yLocation']
+    #             if self.result_key[key]['AccessS'] == 1:
+    #                 return [self.productplacex,self.productplacey-1]
+    #
+    #             elif self.result_key[key]['AccessN'] == 1:
+    #                 return [self.productplacex, self.productplacey +1]
+    #             elif self.result_key[key]['AccessE'] == 1:
+    #                 return [self.productplacex+1, self.productplacey]
+    #             elif self.result_key[key]['AccessW'] == 1:
+    #                 return [self.productplacex-1, self.productplacey - 1]
 
 
     def inputproductIDcheck(self, productlist):
@@ -341,32 +353,46 @@ class Data:
                 self.colmax = self.result_key[key]['yLocation']
 
     def addinfotomap(self):
-        self.map = list()
+        map = list()
         for i in range(self.colmax):
             templist = list()
             for h in range(self.rowmax):
-                #print("number h",h)
-                # if [h,i] == self.startlocation:
-                #     #raise Exception("start location on the shelf wrong")
-                #     # break
-                #     templist.append(2)
-                # elif [h,i] == self.accessdestination:
-                #     templist.append(3)
-                # elif [h,i] == self.itemwewantlocation:
-                #     templist.append(4)
-                    #print("check here", h,i)
                 if [h, i] in self.currentPos_list:
                     templist.append(0)
                 else:
                     templist.append(1)
-            self.map.append(templist)
+            map.append(templist)
         #print("look here", self.map[15][19])
-        return self.map
+        return map
 
-    def changemapinfo(self):
-        self.map[self.startlocation[1]][self.startlocation[0]] = 2
-        self.map[self.accessdestination[1]][self.accessdestination[0]] = 3
-        self.map[self.itemwewantlocation[1]][self.itemwewantlocation[0]] = 4
+    def changemapinfo(self, destination, startlocation):
+        self.map[startlocation[1]][startlocation[0]] = 2
+        for key,value in self.result_key.items():#fix next
+            if key == destination:
+                self.productplacex = self.result_key[key]['xLocation']
+                self.productplacey = self.result_key[key]['yLocation']
+                destination = [self.productplacex,self.productplacey]
+                self.map[self.productplacey][self.productplacex] = 4
+                if self.result_key[key]['AccessS'] == 1:
+                    self.map[self.productplacey-1][self.productplacex] = 3
+                    accessdestination = [self.productplacex,self.productplacey-1]
+                    return [destination, accessdestination]
+
+                elif self.result_key[key]['AccessN'] == 1:
+                    self.map[self.productplacey + 1][self.productplacex] = 3
+                    accessdestination = [self.productplacex, self.productplacey +1]
+                    return [destination, accessdestination]
+
+                elif self.result_key[key]['AccessE'] == 1:
+                    self.map[self.productplacey][self.productplacex+1] = 3
+                    accessdestination = [self.productplacex+1, self.productplacey]
+                    return [destination, accessdestination]
+                elif self.result_key[key]['AccessW'] == 1:
+                    self.map[self.productplacey][self.productplacex -1] = 3
+                    accessdestination = [self.productplacex-1, self.productplacey]
+                    return [destination, accessdestination]
+
+
 
 
 
@@ -380,28 +406,28 @@ class Data:
             for x in y:
 
                 if x == 1:
-                    print("  .  ", end='')
+                    print("  .  ", end = '')
                 elif x == 0:
-                    print("  S  ", end='')
+                    print("  S  ", end = '')
                     # or print pick up
                     # break
                 elif x == 2:
-                    print("  B  ", end='')
+                    print("  B  ", end = '')
                 elif x == 3:
-                    print("  E  ", end='')
+                    print("  E  ", end = '')
                 elif x == 4:
-                    print("  D  ", end='')
+                    print("  D  ", end = '')
             print(self.colmax - 1 - count_number)
             count_number += 1
             print("\n")
 
         for i in range(self.rowmax):
             if i < 10:
-                print(" ", i, " ", end='')
+                print(" ", i, " ", end = '')
             elif i == 10:
-                print(" ", i, " ", end='')
+                print(" ", i, " ", end = '')
             else:
-                print("", i, " ", end='')
+                print("", i, " ", end = '')
         time.sleep(1)
         print("\n")
         print("=============================================================================\n")

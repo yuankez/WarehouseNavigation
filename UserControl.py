@@ -7,7 +7,7 @@ import os
 def runtestcase(testcase, startlocation, data, elapsedTime):
     count = 0
     start = 0
-    stopwatch_start = time.clock()
+    stopwatch_start = time.process_time()
     # for i in testcase:
     #     if start  > len(testcase) - 1:
     #         break
@@ -20,7 +20,7 @@ def runtestcase(testcase, startlocation, data, elapsedTime):
     #     count += 1
     #     start += 1
     print(data.analysisinput(testcase, startlocation))
-    stopwatch_end = time.clock()
+    stopwatch_end = time.process_time()
     runningTime = stopwatch_end - stopwatch_start
     elapsedTime.append(runningTime)
     print("Elapsed Time of BFS :", runningTime, " seconds")
@@ -42,6 +42,7 @@ def printMemoryUsage():
     #print(process.memory_info().rss)
 
 
+
 def takealistoforder(inputlistoforder):
     filename = "" + inputlistoforder
     dataFile = open(filename, 'r')
@@ -51,46 +52,9 @@ def takealistoforder(inputlistoforder):
         temp = line.split()
         listdict[count] = temp
         count+=1
-    print(listdict[1])
+    #print(listdict[1])
     return listdict
     pass
-
-
-def takeorderaslist(path,startlocation,data):
-    inputlistoforder = input("please input the order list path you want: EX: qvBox-warehouse-orders-list-part01.txt")
-    inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
-    orderlist = takealistoforder(inputlistoforder)
-    orderlistnumber = int(input("pleast input which order list number you want to choose: EX: 1 "))
-    testcase = orderlist[int(orderlistnumber)]
-    del orderlist[int(orderlistnumber)]
-    orderlist = takealistoforder(path)
-    templist = []
-    templist2 = orderlist.keys()
-    templist = []
-    for i in templist2:
-        templist.append(i)
-    for i in range(len(orderlist)):
-        temp = input("Please input next order list to pick the next one: EX, Next or 2")
-        if temp == 'next':
-            orderlistnumber = orderlistnumber + 1
-            while (1):
-                if orderlistnumber in templist:
-                    break
-                elif orderlistnumber >= len(templist):
-                    break
-                else:
-                    orderlistnumber = orderlistnumber + 1
-            runtestcase(orderlist[orderlistnumber], startlocation, data, elapsedTime)
-            del orderlist[int(orderlistnumber)]
-            templist.remove(orderlistnumber)
-        elif temp == 'exit':
-            print("Pick up has been stoped")
-            break
-        else:
-            orderlistnumber = temp
-            runtestcase(orderlist[int(orderlistnumber)], startlocation, data, elapsedTime)
-            del orderlist[int(orderlistnumber)]
-            templist.remove(orderlistnumber)
 
 
 def main():
@@ -124,30 +88,64 @@ def main():
     testcase5 = ['1','74','45','102','149','670', '1045','2029', '2826']# xlocation bump back and force
     testcase6 = ['1','74','102','102','149']# try to pick up same item twice
     testcase7 = ['1','74','102','103','149']#one of item not exit '103'
-    testcase8 = ['16643','123462'	,'119063',	'128827',	'188598',	'323836',	'660999',	'661002']
+    testcase8 = ['16643','123462'	,'119063',	'128827',	'188598',	'323836',	'660999']
 
     count = 0
     #data.inserttobackend([0,0], '149',count)
     elapsedTime = []
 
     #startlocation = input("where you want to start")
-    #start = time.time()
 
-    runtestcase(testcase8, startlocation, data, elapsedTime)
-    #end = time.time()
 
-    #                    List of Order
+    # singel test case
+    #runtestcase(testcase8, startlocation, data, elapsedTime)
+
+    # printTestCaseTime(elapsedTime, startlocation)
+    # printMemoryUsage()
+
+    #      List of Order
     #takeorderaslist(startlocation, data, elapsedTime)
 
+    inputlistoforder = input("please input the order list path you want: EX: qvBox-warehouse-orders-list-part01.txt")
+    inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
 
-    #print("S means shelf location, B means start begin location")
-    #productpick = input("Input the product id you want to pick EX: 149\n")
-    listproduct = ['0','45', '149']
-    #data.findpathtoitem1('1')
-    # for i in testcaseold:
-    #     data.printworldtemp( startlocation, productpick)
-        #data.findpathtoitem1(i)
+    orderlist = takealistoforder(inputlistoforder)
 
+    orderlistnumber = int(input("pleast input which order list number you want to choose: EX: 1 "))
+    testcase = orderlist[int(orderlistnumber)]
+    del orderlist[int(orderlistnumber)]
+    runtestcase(testcase, startlocation, data, elapsedTime)
+
+
+
+
+
+    templist2 = orderlist.keys()
+    templist = []
+    for i in templist2:
+        templist.append(i)
+    for i in range(len(orderlist)):
+        temp = input("Please input next order list to pick the next one: EX, Next or 2")
+        if temp == 'next':
+            orderlistnumber = orderlistnumber + 1
+            while (1):
+                if orderlistnumber in templist:
+                    break
+                elif orderlistnumber >= len(templist):
+                    break
+                else:
+                    orderlistnumber = orderlistnumber + 1
+            runtestcase(orderlist[orderlistnumber], startlocation, data, elapsedTime)
+            del orderlist[int(orderlistnumber)]
+            templist.remove(orderlistnumber)
+        elif temp == 'exit':
+            print("Pick up has been stoped")
+            break
+        else:
+            orderlistnumber = temp
+            runtestcase(orderlist[int(orderlistnumber)], startlocation, data, elapsedTime)
+            del orderlist[int(orderlistnumber)]
+            templist.remove(orderlistnumber)
     printTestCaseTime(elapsedTime, startlocation)
     printMemoryUsage()
 
