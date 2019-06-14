@@ -363,7 +363,54 @@ class Map_print():
 
 
     def addinfotomap2(self,resultlist):
-        print("final path list:", resultlist)
+        #print("final path list:", resultlist)
+        print("Path Directions")
+        starting = -1
+        goRight = 0
+        goLeft = 1
+        goUp = 2
+        goDown = 3
+
+        curr_x, curr_y = resultlist[0]
+        steps = 0
+        curr_direction = starting
+
+        for i in range(1,len(resultlist)):
+            x_next, y_next = resultlist[i]
+            #print(x_next, y_next)
+            change_x = x_next - curr_x
+            change_y = y_next - curr_y
+
+            # go right
+            if(change_x == 1 and change_y == 0):
+                next_direction = goRight
+            # go left
+            elif(change_x == -1 and change_y == 0):
+                next_direction = goLeft
+            # go up
+            elif(change_x == 0 and change_y == 1):
+                next_direction = goUp
+            # go down
+            elif(change_x == 0 and change_y == -1):
+                next_direction = goDown
+
+            # check to see if you changed direction
+            if (curr_direction != next_direction and curr_direction != starting):
+                if(curr_direction == goRight):
+                    print("Take ", steps, " step(s) to the east.")
+                elif(curr_direction == goLeft):
+                    print("Take ", steps, " step(s) to the west.")
+                elif(curr_direction == goUp):
+                    print("Take ", steps, " step(s) to the north.")
+                elif(curr_direction == goDown):
+                    print("Take ", steps, " step(s) to the south.")
+                # reset the number of steps
+                steps = 0
+
+            steps = steps + 1
+            curr_x, curr_y = x_next, y_next
+            curr_direction = next_direction
+
         map2 = []
         #print(resultlist)
         #print([1,2] in resultlist)
