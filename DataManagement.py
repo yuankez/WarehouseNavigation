@@ -6,7 +6,7 @@ import json
 import time
 from collections import defaultdict
 import collections
-from itertools import combinations, permutations
+import itertools #import combinations, permutations
 #import Queue
 
 from queue import *
@@ -27,73 +27,34 @@ class Queue:
     def size(self):
         return len(self.items)
 
-class Data:
-    #global result_key,result_val
-    #result_key = defaultdict(dict)
-    #result_val = {}
-    #def __init__(self, path,):
-    #will change to self._init later
+class Data():
 
-    def _init_(self):
-        pass
-    def inputdata(self, path):
-        #filename = "/Users/Yuank/Desktop/WarehouseNavigation/MyFile.txt"
-        filename = "" + path
-        dataFile = open(filename, 'r')
-        print("File read.")
-        time.sleep(1)
-        header = dataFile.readline().strip().split('\t')
-        #print("Headers of Data = ", header)
-        data = []
-        count = 0
-        temp = 0
+
+    def __init__(self):
+        self.rowmax = 0
+        self.colmax = 0
+        self.map = list()
+        self.startlocation_input = list()
+        self.result_key = dict()
         self.totalpath = 0
-        self.result_key = defaultdict(dict)
-        self.result_val = {}
+        self.itemslist = list()
+        self.currentPos_list = []
+        self.startlocation_ID = '0'
 
-        # Currently in a list format with nested dictionary for every individual header
-        for line in dataFile:
-            col = line.strip().split('\t')
-            row = dict()
-            for j, i in enumerate(header):
-                row[i] = col[j]
-            data.append(row)
 
-        for i in data:
-            for key, value in i.items():
-                if key == 'ProductID':
-                    temp = value
-                    # del result_key[temp]
-                else:
-                    self.result_val[key] = int(float(value))
-            temp_dict = self.result_val.copy()
-            self.result_key[temp] = temp_dict
-            self.result_val.clear()
-            count += 1
-            #print(self.result_key)
-            # if count == 50:
-            #     break
-        dataFile.close()
-        #print(self.result_key.keys())
-        self.currentPos_list = list()
+    def load_data(self,testcase, startlocation, colmax, rowmax, Init_Map, Items_information):
+        self.itemslist = sorted(testcase + [self.startlocation_ID])
+        print(self.itemslist)
+        self.startlocation_input = startlocation
+        self.map = Init_Map
+        self.result_key = Items_information
+        self.rowmax = rowmax
+        self.colmax = colmax
+
         for i in self.result_key.items():
             if [i[1]['xLocation'], i[1]['yLocation']] not in self.currentPos_list:
                 self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
-        self.itemdict = defaultdict()
-        self.rowmax = 00
-        self.colmax = 0
-        self.findrowcolmax()
 
-        # store 2-D demention Map
-        self.map = self.addinfotomap()#map[col][row]
-        self.map.reverse()
-        self.printworldtemp_frontend()
-        self.map.reverse()
-
-        print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
-        return [self.rowmax,self.colmax]
-
-        #return self.result_key
 
     def finditemsinformation(self, product_ID):
         keys = self.result_key.keys()
@@ -103,72 +64,49 @@ class Data:
             if key == product_ID:
                 print("Product: ", product_ID, "Location is: [", self.result_key[product_ID]['xLocation'],',', self.result_key[product_ID]['yLocation'],']')
 
-    def analysisinput(self, itemslist,startlocation):
-        self.storpath = []
+    def analysisinput(self):
         self.pathlist = []
-        self.itemslist = itemslist
-        self.primelist = list(permutations(self.itemslist, len(self.itemslist)))
-        self.pathdict = defaultdict()
-        self.startlocation = startlocation
+        items_distance = defaultdict()
+        self.storpath = []
         count = 0
         printmap = 0
-        self.totalpathlist = []
+        #self.totalpathlist = []
         self.itemwepreviouswant = 0
-        self.mapstore = []
 
-        for prime in self.primelist:
-            #print("This time prime:", prime)
-            for item in prime:
-                if count == 0:
-                    self.startlocation = startlocation
-                    self.startlocation = self.inserttobackend(self.startlocation,item,count)
-             #print(self.startlocation)
-                    #print("The starting location",self.startlocation)
-                    self.itemwepreviouswant = item
-                else:
-                    #print("get here or not",self.startlocation,item)
-                    self.startlocation = self.inserttobackend(self.startlocation, item, count)
-                    self.itemwepreviouswant = item
-                #print("now we have total path in EACH PRIME", self.totalpath)
+        item_to_item_list = list(itertools.combinations(self.itemslist, 2))
+        print("item to item list:", item_to_item_list)
 
-                count += 1
-                printmap += 1
-            #self.mapstore.append([self.totalpath, self.map])
-            count = 0
-            #print("now we have total path", self.totalpath)
-            self.totalpathlist.append(self.totalpath)
-            self.map = self.addinfotomap()
-            self.totalpath = 0
-            self.itemwepreviouswant = 0
-            self.startlocation = startlocation
+        for i in item_to_item_list:
+            items_distance = self.inserttobackend(i, items_distance)
+        print("item to item distance", items_distance)
+        #print(self.pathlist)
 
-        realshortest = 0
-        #print(self.totalpathlist)
-        for i in self.totalpathlist:
-             if realshortest == 0:
-                 realshortest = i
-             elif i <= realshortest:
-                 realshortest = i
+        return items_distance
 
-        pathlist = self.putresultpath()
-        map2 = self.addinfotomap2(pathlist)
-        #self.printworldtemp_frontend2(self.mapstore)
-        self.printworldtemp_frontend2(map2)
-
-        return ("The shortest path is: ", realshortest)
+        #self.mapstore = []
 
 
-    def inserttobackend(self, startlocation, productID, counts):
 
-        #set max length row and column
-        self.itemwewant = productID
+
+
+    def inserttobackend(self, start_to_productID, items_distance):
+
+
+        #startlocation ID
+        self.startlocation_ID = start_to_productID[0]
+        startlocation = self.find_item_information(self.startlocation_ID)
+
+
+        #EndLocation ID
+        itemwewant = start_to_productID[1]
+
         # associate with ID number x,y location and its direction
         # Positions contain shelf
 
         # find the entry location
         #self.accessdestination = self.directionclear(productID)
 
-        destination_entry = self.changemapinfo(productID, startlocation)
+        destination_entry = self.changemapinfo(itemwewant, startlocation)
 
         self.accessdestination = destination_entry[1]
         # find the item location
@@ -177,6 +115,8 @@ class Data:
 
         #find path to item
         self.path = self.findpathtoitem1(startlocation, self.itemwewantlocation)
+        #print("path is :",self.path)
+
         if self.path[0] != 'The path is not eixt':
             #self.totalpath += int(self.path[0])
             #print(self.totalpath)
@@ -184,20 +124,22 @@ class Data:
         #print(self.pathlist)# change it to a key associate path list which
         #return self.itemwewantlocation
         #print('\n')
-           # self.printworldtemp_frontend(startlocation,productID)
-        if counts == 0:
-            self.storpath.append([startlocation, [self.itemwewant, self.path]])
-        else:
-            self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
+        #    # self.printworldtemp_frontend(startlocation,productID)
+        # if counts == 0:
+        #     self.storpath.append([startlocation, [self.itemwewant, self.path]])
+        # else:
+        #     self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
 
         self.map[self.accessdestination[1]][self.accessdestination[0]] = 1
 
+        #store to distance_dict
+        items_distance[start_to_productID] = self.path[0]
 
-        return self.itemwewantlocation
+        return items_distance
 
     def findpathtoitem1(self, startlocation, destination):
-        self.startlocationrow = startlocation[0]
-        self.startlocationcol = startlocation[1]
+        startlocationrow = startlocation[0]
+        startlocationcol = startlocation[1]
         destinationrow = destination[0]
         destinationcol = destination[1]
         ##################  structure
@@ -229,7 +171,7 @@ class Data:
         self.dr = [-1, +1, 0, 0]  # direction vector for row and column
         self.dc = [0, 0, +1, -1]
 
-        shortestpath = self.findpathtoitem1_solve()
+        shortestpath = self.findpathtoitem1_solve(startlocationrow, startlocationcol)
        # print(self.shortestpath, "I am here")
 
         if shortestpath != 'The path is not eixt':
@@ -239,16 +181,17 @@ class Data:
             raise ValueError('The path is not eixt')
             return 0
 
-    def findpathtoitem1_solve(self):
-        self.rqueue.enqueue(self.startlocationrow)
-        self.cqueue.enqueue(self.startlocationcol)
-        self.visited[self.startlocationcol][self.startlocationrow] = True
+    def findpathtoitem1_solve(self, startlocationrow, startlocationcol):
+
+        self.rqueue.enqueue(startlocationrow)
+        self.cqueue.enqueue(startlocationcol)
+        self.visited[startlocationcol][startlocationrow] = True
         while self.rqueue.size() > 0:
             r = self.rqueue.dequeue()
             c = self.cqueue.dequeue()
             if self.map[c][r] == 3:
                 self.reached_end = True
-                self.backtrack(r, c)  # find the path
+                self.backtrack(r, c,startlocationrow,startlocationcol)  # find the path
                 break
 
             self.explor_neighbours(r, c)
@@ -285,9 +228,9 @@ class Data:
             self.node_parent[(cc, rr)] = (c, r)
             self.nodes_in_next_layer = self.nodes_in_next_layer + 1
 
-    def backtrack(self, r, c):
+    def backtrack(self, r, c, startlocationrow, startlocationcol):
         pr, pc = r, c
-        while pr != self.startlocationrow or pc != self.startlocationcol:
+        while pr != startlocationrow or pc != startlocationcol:
             # print(pr,pc)
             self.path.append((pr, pc))
             # print("append",(pc,pr))
@@ -300,25 +243,6 @@ class Data:
         self.path.reverse()
 
 
-
-    #
-    # def directionclear(self, destination):
-    #     for key,value in self.result_key.items():
-    #
-    #         if key == destination:
-    #             self.productplacex = self.result_key[key]['xLocation']
-    #             self.productplacey = self.result_key[key]['yLocation']
-    #             if self.result_key[key]['AccessS'] == 1:
-    #                 return [self.productplacex,self.productplacey-1]
-    #
-    #             elif self.result_key[key]['AccessN'] == 1:
-    #                 return [self.productplacex, self.productplacey +1]
-    #             elif self.result_key[key]['AccessE'] == 1:
-    #                 return [self.productplacex+1, self.productplacey]
-    #             elif self.result_key[key]['AccessW'] == 1:
-    #                 return [self.productplacex-1, self.productplacey - 1]
-
-
     def inputproductIDcheck(self, productlist):
         templist = list()
         for key, value in self.result_key.items():
@@ -328,29 +252,7 @@ class Data:
                 return False
         return True
 
-    def printcolumnnuber(self):
-        for i in range(self.rowmax+2):
-            if i == 0:
-                print("", end = '')
-            elif i == self.rowmax+1:
-                print(" ", i-1," \n")
-            elif i == self.rowmax+2:
-                break
-            elif i >= 10:
-                print("  ", i-1, end = '')
-            else:
-                print(" ",i-1," ", end = '')
 
-    def findrowcolmax(self):
-        for key, value in self.result_key.items():
-            self.itemdict[key] = [self.result_key[key]['xLocation'], self.result_key[key]['yLocation']]
-            #print(self.itemdict)
-            tempy = self.result_key[key]['yLocation']
-            tempx = self.result_key[key]['xLocation']
-            if tempx > int(self.rowmax):
-                self.rowmax = self.result_key[key]['xLocation']
-            if tempy > int(self.colmax):
-                self.colmax = self.result_key[key]['yLocation']
 
     def addinfotomap(self):
         map = list()
@@ -393,6 +295,30 @@ class Data:
                     return [destination, accessdestination]
 
 
+    def find_item_information(self, product_ID):
+        if product_ID == '0':
+           # print("input location", self.startlocation_input)
+            return self.startlocation_input
+        for key,value in self.result_key.items():#fix next
+            if key == product_ID:
+                productplacex = self.result_key[key]['xLocation']
+                productplacey = self.result_key[key]['yLocation']
+                if self.result_key[key]['AccessS'] == 1:
+                    accessdestination = [productplacex,productplacey-1]
+                    return accessdestination
+
+                elif self.result_key[key]['AccessN'] == 1:
+                    accessdestination = [productplacex, productplacey +1]
+                    return accessdestination
+
+                elif self.result_key[key]['AccessE'] == 1:
+                    accessdestination = [productplacex+1, productplacey]
+                    return accessdestination
+                elif self.result_key[key]['AccessW'] == 1:
+                    accessdestination = [productplacex-1, productplacey]
+                    return accessdestination
+        return "The Product ID you looking is not exit"
+
 
 
 
@@ -433,13 +359,6 @@ class Data:
         print("=============================================================================\n")
         # self.print()
 
-    def putresultpath(self):
-        resultlist = []
-        for i in self.pathlist:
-            for g in i:
-                #print(g)
-                resultlist.append(g)
-        return resultlist
 
     def addinfotomap2(self,resultlist):
         print("final path list:", resultlist)
@@ -471,51 +390,11 @@ class Data:
         # print("look here", self.map[15][19])
         return map2
 
-
-    # def printworldtemp_frontend2(self, mapstore):
-    #     count_number = 0
-    #     findshortes = 10000000
-    #     map2 = list()
-    #     for key in mapstore:
-    #         if key[0] <= findshortes:
-    #             findshortes = key[0]
-    #             map2 = key[1]
-    #     map2.reverse()
-    #     for y in map2:
-    #         templist = list()
-    #         for x in y:
-    #
-    #             if x == 1:
-    #                 print(" . ", end='')
-    #             elif x == 0:
-    #                 print(" S ", end='')
-    #                 # or print pick up
-    #                 # break
-    #             elif x == 2:
-    #                 print(" B ", end='')
-    #             elif x == 3:
-    #                 print(" O ", end='')
-    #             elif x == 4:
-    #                 print(" D ", end='')
-    #             elif x == 5:
-    #                 print(" O ", end='')
-    #         print(self.colmax - 1 - count_number)
-    #         count_number += 1
-    #     for i in range(self.rowmax):
-    #
-    #         if i < 10:
-    #             print("", i, "", end='')
-    #         elif i == 10:
-    #             print("", i, "", end='')
-    #         else:
-    #             print("",i, end='')
-    #     time.sleep(1)
-    #     print("\n")
-    #     print("=============================================================================\n")
     def printworldtemp_frontend2(self, map2):
         count_number = 0
         map2.reverse()
         for y in map2:
+            templist = list()
             templist = list()
             for x in y:
 
@@ -546,3 +425,4 @@ class Data:
         time.sleep(1)
         print("\n")
         print("=============================================================================\n")
+
