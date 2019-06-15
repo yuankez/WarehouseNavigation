@@ -4,7 +4,7 @@ from Algoritm import Algorithm
 from Map_printout import Map_print
 import StoreData
 import time
-import psutil
+# import psutil
 import os
 
 def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init_Map, Items_information, item_to_item_distance, printmap, elapsedTime):
