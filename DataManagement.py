@@ -44,7 +44,7 @@ class Data():
 
     def load_data(self,testcase, startlocation, colmax, rowmax, Init_Map, Items_information, item_to_item_Distance):
         self.itemslist = sorted(testcase + [self.startlocation_ID])
-        print(self.itemslist)
+        # print(self.itemslist)
         self.startlocation_input = startlocation
         self.map = Init_Map
         self.item_to_item_distance = item_to_item_Distance
@@ -64,6 +64,7 @@ class Data():
         for key,value in self.result_key.items():
             if key == product_ID:
                 print("Product: ", product_ID, "Location is: [", self.result_key[product_ID]['xLocation'],',', self.result_key[product_ID]['yLocation'],']')
+
 
     def analysisinput(self):
         self.pathlist = []

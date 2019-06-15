@@ -372,7 +372,7 @@ class Map_print():
     def addinfotomap2(self,resultlist):
         #print("final path list:", resultlist)
         print("\nPath Directions To: ")
-        for i in range(len(self.itemslist)):
+        for i in range(len(self.itemslist)-1):
             if (i != 0):
                 print("item ", self.itemslist[i])
 
@@ -391,14 +391,13 @@ class Map_print():
 
         item_index = 0
         item_curr, item_next = self.itemslist[item_index], self.itemslist[item_index + 1]
-        distanceToNextItem = self.item_to_item_distance.get(
-            (self.itemslist[item_index], self.itemslist[item_index + 1]))
+        distanceToNextItem = self.item_to_item_distance.get((self.itemslist[item_index], self.itemslist[item_index + 1]))
         item_steps_count = 0
         total_num_items = len(self.itemslist)
         lastItemReached = False
-        print("Current Item: ", item_curr, "Next Item ", item_next, "Distance to Travel ", distanceToNextItem, "Total items ", total_num_items)
-        print("Go to item ", item_next)
-        print("Distance", distanceToNextItem)
+        # print("Current Item: ", item_curr, "Next Item ", item_next, "Distance to Travel ", distanceToNextItem, "Total items ", total_num_items)
+        # print("Go to item ", item_next)
+        # print("Distance", distanceToNextItem)
         for i in range(1, len(resultlist)):
             x_next, y_next = resultlist[i]
 
@@ -421,7 +420,7 @@ class Map_print():
 
             # check to see if item is reached
             if (item_steps_count == distanceToNextItem and item_steps_count != 0):
-                print("Pick up item ", item_next)
+                # print("Pick up item ", item_next)
 
                 # update next_direction
                 next_direction = arrivedAtItem
@@ -436,15 +435,15 @@ class Map_print():
                     lastItemReached = True
 
                 if (lastItemReached == True):
-                    print("Navigation finished.")
+                    # print("Navigation finished.")
                     break
                 else:
                     item_curr = self.itemslist[item_index]
                     item_next = self.itemslist[item_index + 1]
                     distanceToNextItem = self.item_to_item_distance.get(
                         (self.itemslist[item_index], self.itemslist[item_index + 1]))
-                    print("Go to item ", item_next)
-                    print("Distance", distanceToNextItem)
+                    # print("Go to item ", item_next)
+                    # print("Distance", distanceToNextItem)
 
             # check to see if you changed direction
             if (curr_direction != next_direction and curr_direction != starting and curr_direction != arrivedAtItem):
@@ -466,6 +465,7 @@ class Map_print():
 
             # update the steps to next item
             item_steps_count = item_steps_count + 1
+        print("Navigation finished.")
 
         map2 = []
         #print(resultlist)

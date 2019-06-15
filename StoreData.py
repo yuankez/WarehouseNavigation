@@ -67,7 +67,7 @@ class StoreData:
         #self.printworldtemp_frontend()
         self.map.reverse()
 
-        print("warehouse row siz is: ", self.rowmax, "warehouse column size is: ", self.colmax)
+        print("Warehouse Dimensions: ", self.rowmax, " X ", self.colmax)
         return [self.map, self.rowmax,self.colmax, self.result_key]
 
     def addinfotomap(self):
@@ -84,6 +84,10 @@ class StoreData:
         return map
 
     def printworldtemp_frontend(self):
+        print("=============================================================================\n")
+        print("WAREHOUSE MAP WITH PATHS\n")
+        print("Legend:\n\tS = shelf\n\tB = your starting location\n\tO = path in warehouse\n")
+        print("   North\nWest\tEast\n   South\n")
 
         self.avaliablepath = list()
         # self.print()

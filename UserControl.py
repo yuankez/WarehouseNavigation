@@ -22,16 +22,16 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
     item_to_item_distance = data.analysisinput()
 
     #Brute_force_algorithm
-    #result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
+    result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
 
 
     #BRUTE FORCE
-    #Optimize_order = list(result[1])
+    Optimize_order = list(result[1])
 
     # NNBranBoun
     # NN
-    result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
-    Optimize_order = result[0]
+    #result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
+    # Optimize_order = result[0]
     # print("iopasasa", Optimize_order)
 
 
@@ -87,8 +87,42 @@ def takealistoforder(inputlistoforder):
         count+=1
     #print(listdict[1])
     return listdict
-    pass
 
+# def takeorderaslist(path,startlocation,data):
+#     inputlistoforder = input("please input the order list path you want: EX: qvBox-warehouse-orders-list-part01.txt")
+#     inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
+#     orderlist = takealistoforder(inputlistoforder)
+#     orderlistnumber = int(input("pleast input which order list number you want to choose: EX: 1 "))
+#     testcase = orderlist[int(orderlistnumber)]
+#     del orderlist[int(orderlistnumber)]
+#     orderlist = takealistoforder(path)
+#     templist = []
+#     templist2 = orderlist.keys()
+#     templist = []
+#     for i in templist2:
+#         templist.append(i)
+#     for i in range(len(orderlist)):
+#         temp = input("Please input next order list to pick the next one: EX, Next or 2")
+#         if temp == 'next':
+#             orderlistnumber = orderlistnumber + 1
+#             while (1):
+#                 if orderlistnumber in templist:
+#                     break
+#                 elif orderlistnumber >= len(templist):
+#                     break
+#                 else:
+#                     orderlistnumber = orderlistnumber + 1
+#             runtestcase(orderlist[orderlistnumber], startlocation, data, elapsedTime)
+#             del orderlist[int(orderlistnumber)]
+#             templist.remove(orderlistnumber)
+#         elif temp == 'exit':
+#             print("Pick up has been stoped")
+#             break
+#         else:
+#             orderlistnumber = temp
+#             runtestcase(orderlist[int(orderlistnumber)], startlocation, data, elapsedTime)
+#             del orderlist[int(orderlistnumber)]
+#             templist.remove(orderlistnumber)
 
 def main():
     # Accept file path
@@ -113,8 +147,12 @@ def main():
 
     #because of the huge database, for now only print one item
     #data.finditemsinformation('1')
-    print("The Input of row and col length is", Map_row_max,",",  Map_col_max)
 
+
+    print("\nWelcome to the Warehouse Navigator")
+    print("What position are you starting from in the warehouse?")
+    print("\tRow input is valid from:\t 0 to ",  Map_row_max -1)
+    print("\tColumn input is valid from:\t 0 to ", Map_col_max-1)
     #input_start_location
     startlocationrow = input("Please the start location row number: " )
     startlocationcal = input("Please the start location col number: " )
@@ -128,8 +166,8 @@ def main():
 
 
     #print("Init_map", Init_Map)
-    print("row max", Map_row_max)
-    print("col max", Map_col_max)
+    # print("row max", Map_row_max)
+    # print("col max", Map_col_max)
     #print(Items_information)
 
     #productpick = '149'
@@ -152,8 +190,16 @@ def main():
     #data.inserttobackend([0,0], '149',count)
     elapsedTime = []
 
-    # singel test case
-    runtestcase(testcase8, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
+
+    inputlistoforder = input("please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
+    inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
+    order = takealistoforder(inputlistoforder)
+    # print("ORDER ", order)
+    orderlistnumber = int(input("Please input which order you'd like to find (0 to 100): EX: 1 "))
+    testcase = order[int(orderlistnumber)]
+
+    # single test case
+    runtestcase(testcase3, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
 
     printTestCaseTime(elapsedTime, startlocation)
     printMemoryUsage()
@@ -161,7 +207,7 @@ def main():
     #      List of Order
     #takeorderaslist(startlocation, data, elapsedTime)
 
-    #inputlistoforder = input("please input the order list path you want: EX: qvBox-warehouse-orders-list-part01.txt")
+    #inputlistoforder = input("please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
     # inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
     #
     # orderlist = takealistoforder(inputlistoforder)
