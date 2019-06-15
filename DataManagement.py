@@ -79,6 +79,7 @@ class Data():
         for i in item_to_item_list:
             items_distance = self.inserttobackend(i, items_distance)
         print("item to item distance", items_distance)
+
         #print(self.pathlist)
 
         return items_distance
@@ -121,14 +122,6 @@ class Data():
             #self.totalpath += int(self.path[0])
             #print(self.totalpath)
             self.pathlist.append(self.path[1])
-        #print(self.pathlist)# change it to a key associate path list which
-        #return self.itemwewantlocation
-        #print('\n')
-        #    # self.printworldtemp_frontend(startlocation,productID)
-        # if counts == 0:
-        #     self.storpath.append([startlocation, [self.itemwewant, self.path]])
-        # else:
-        #     self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
 
         self.map[self.accessdestination[1]][self.accessdestination[0]] = 1
 

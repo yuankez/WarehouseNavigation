@@ -7,7 +7,7 @@ import time
 #import psutil
 import os
 
-def runtestcase(testcase, startlocation, data, colmax, rowmax, Init_Map, Items_information, item_to_item_distance, printmap, elapsedTime):
+def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init_Map, Items_information, item_to_item_distance, printmap, elapsedTime):
 
     count = 0
     start = 0
@@ -15,22 +15,34 @@ def runtestcase(testcase, startlocation, data, colmax, rowmax, Init_Map, Items_i
     stopwatch_start = time.process_time()
 
     #load data to the system
-    data.load_data(testcase, startlocation,colmax,rowmax,Init_Map,Items_information)
+    data.load_data(testcase, startlocation, colmax,rowmax,Init_Map,Items_information)
 
     #anaylsis input_bfs
     item_to_item_distance = data.analysisinput()
 
     #Brute_force_algorithm
-    #result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
-
-    #minmize_optimaztion
     result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
-    final_step_couht = result[0]
+
+
+    #BRUTE FORCE
     Optimize_order = list(result[1])
+
+    # NNBranBoun
+    # NN
+    # result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
+    # Optimize_order = result[0]
+    # print("iopasasa", Optimize_order)
+
+
+
 
     #print_the_best_rout
 
-    printmap.load_data(Optimize_order, startlocation, colmax,rowmax,Init_Map,Items_information)
+    printmap.load_data(Optimize_order, startlocation, endlocation, colmax,rowmax,Init_Map,Items_information)
+
+    print("The total step is:", result[1])
+
+    print("The worker exit at", endlocation)
 
 
 
@@ -101,10 +113,17 @@ def main():
     #because of the huge database, for now only print one item
     #data.finditemsinformation('1')
     print("The Input of row and col length is", Map_row_max,",",  Map_col_max)
-    #
+
+    #input_start_location
     startlocationrow = 0 #input("Please the start location row number: " )
     startlocationcal = 0 #input("Please the start location col number: " )
     startlocation = [int(startlocationrow),int(startlocationcal)]
+
+    #input end location
+    endlocationrow = 4 #input("Please the end location row number: " )
+    endlocationcal = 4 #input("Please the start location col number: " )
+    endlocation = [int(endlocationrow),int(endlocationcal)]
+
 
 
     #print("Init_map", Init_Map)
@@ -133,7 +152,7 @@ def main():
     elapsedTime = []
 
     # singel test case
-    runtestcase(testcase3, startlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
+    runtestcase(testcase3, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
 
     printTestCaseTime(elapsedTime, startlocation)
     printMemoryUsage()
