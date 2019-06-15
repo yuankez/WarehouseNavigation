@@ -4,7 +4,7 @@ from Algoritm import Algorithm
 from Map_printout import Map_print
 import StoreData
 import time
-#import psutil
+import psutil
 import os
 
 def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init_Map, Items_information, item_to_item_distance, printmap, elapsedTime):
@@ -15,22 +15,23 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
     stopwatch_start = time.process_time()
 
     #load data to the system
-    data.load_data(testcase, startlocation, colmax,rowmax,Init_Map,Items_information)
+    print(type(data))
+    data.load_data(testcase, startlocation, colmax,rowmax,Init_Map,Items_information, item_to_item_distance)
 
     #anaylsis input_bfs
     item_to_item_distance = data.analysisinput()
 
     #Brute_force_algorithm
-    result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
+    #result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
 
 
     #BRUTE FORCE
-    Optimize_order = list(result[1])
+    #Optimize_order = list(result[1])
 
     # NNBranBoun
     # NN
-    # result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
-    # Optimize_order = result[0]
+    result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
+    Optimize_order = result[0]
     # print("iopasasa", Optimize_order)
 
 
@@ -38,7 +39,7 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
 
     #print_the_best_rout
 
-    printmap.load_data(Optimize_order, startlocation, endlocation, colmax,rowmax,Init_Map,Items_information)
+    printmap.load_data(Optimize_order, startlocation, endlocation, colmax,rowmax,Init_Map,Items_information,item_to_item_distance)
 
     print("The total step is:", result[1])
 
@@ -55,10 +56,10 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
     stopwatch_end = time.process_time()
     runningTime = stopwatch_end - stopwatch_start
     elapsedTime.append(runningTime)
-    print("Elapsed Time of BFS :", runningTime, " seconds")
+    print("Elapsed Time For Search :", runningTime, " seconds")
 
 def printTestCaseTime(elapsedTime, startlocation):
-    print('Running Time of BFS')
+    print('Running Time of Search')
     print('Starting Location: ', startlocation)
     for i in range(len(elapsedTime)):
         #print("Testcase", i + 1,"\t", elapsedTime[i], " seconds")
@@ -70,8 +71,8 @@ def printMemoryUsage():
     # Only run one testcase at a time
     # print(psutil.virtual_memory())
     print('PID For User Control:', os.getpid())
-    #process = psutil.Process(os.getpid())   # get mem
-    #print(process.memory_info().rss)
+    process = psutil.Process(os.getpid())   # get mem
+    print("Memory Usage", process.memory_info().rss, " Bytes")
 
 
 
@@ -115,8 +116,8 @@ def main():
     print("The Input of row and col length is", Map_row_max,",",  Map_col_max)
 
     #input_start_location
-    startlocationrow = 0 #input("Please the start location row number: " )
-    startlocationcal = 0 #input("Please the start location col number: " )
+    startlocationrow = input("Please the start location row number: " )
+    startlocationcal = input("Please the start location col number: " )
     startlocation = [int(startlocationrow),int(startlocationcal)]
 
     #input end location
@@ -152,7 +153,7 @@ def main():
     elapsedTime = []
 
     # singel test case
-    runtestcase(testcase3, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
+    runtestcase(testcase8, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
 
     printTestCaseTime(elapsedTime, startlocation)
     printMemoryUsage()

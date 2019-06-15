@@ -41,10 +41,11 @@ class Map_print():
         self.currentPos_list = []
         self.startlocation_ID = '0'
         self.endlocation_ID = '01'
+        self.item_to_item_distance = dict()  # new thing
         #self.endlocation_input = (4,4)
 
 
-    def load_data(self,testcase, startlocation, endlocation, colmax, rowmax, Init_Map, Items_information):
+    def load_data(self,testcase, startlocation, endlocation, colmax, rowmax, Init_Map, Items_information, item_to_item_Distance):
         self.itemslist =  [self.startlocation_ID] + testcase
         print(self.itemslist)
         self.startlocation_input = startlocation
@@ -53,7 +54,7 @@ class Map_print():
         self.rowmax = rowmax
         self.colmax = colmax
         self.endlocation_input = endlocation
-
+        self.item_to_item_distance = item_to_item_Distance.copy()  # new
         for i in self.result_key.items():
             if [i[1]['xLocation'], i[1]['yLocation']] not in self.currentPos_list:
                 self.currentPos_list.append([i[1]['xLocation'], i[1]['yLocation']])
@@ -370,52 +371,101 @@ class Map_print():
 
     def addinfotomap2(self,resultlist):
         #print("final path list:", resultlist)
-        print("Path Directions")
+        print("\nPath Directions To: ")
+        for i in range(len(self.itemslist)):
+            if (i != 0):
+                print("item ", self.itemslist[i])
+
+        print("\nStart.")
+        # states of the path direction
         starting = -1
-        goRight = 0
-        goLeft = 1
-        goUp = 2
-        goDown = 3
+        arrivedAtItem = 0
+        goRight = 1
+        goLeft = 2
+        goUp = 3
+        goDown = 4
 
         curr_x, curr_y = resultlist[0]
-        steps = 0
+        direction_steps_count = 0
         curr_direction = starting
 
-        for i in range(1,len(resultlist)):
+        item_index = 0
+        item_curr, item_next = self.itemslist[item_index], self.itemslist[item_index + 1]
+        distanceToNextItem = self.item_to_item_distance.get(
+            (self.itemslist[item_index], self.itemslist[item_index + 1]))
+        item_steps_count = 0
+        total_num_items = len(self.itemslist)
+        lastItemReached = False
+        print("Current Item: ", item_curr, "Next Item ", item_next, "Distance to Travel ", distanceToNextItem, "Total items ", total_num_items)
+        print("Go to item ", item_next)
+        print("Distance", distanceToNextItem)
+        for i in range(1, len(resultlist)):
             x_next, y_next = resultlist[i]
-            #print(x_next, y_next)
+
+            # print(x_next, y_next)
             change_x = x_next - curr_x
             change_y = y_next - curr_y
 
             # go right
-            if(change_x == 1 and change_y == 0):
+            if (change_x == 1 and change_y == 0):
                 next_direction = goRight
             # go left
-            elif(change_x == -1 and change_y == 0):
+            elif (change_x == -1 and change_y == 0):
                 next_direction = goLeft
             # go up
-            elif(change_x == 0 and change_y == 1):
+            elif (change_x == 0 and change_y == 1):
                 next_direction = goUp
             # go down
-            elif(change_x == 0 and change_y == -1):
+            elif (change_x == 0 and change_y == -1):
                 next_direction = goDown
 
-            # check to see if you changed direction
-            if (curr_direction != next_direction and curr_direction != starting):
-                if(curr_direction == goRight):
-                    print("Take ", steps, " step(s) to the east.")
-                elif(curr_direction == goLeft):
-                    print("Take ", steps, " step(s) to the west.")
-                elif(curr_direction == goUp):
-                    print("Take ", steps, " step(s) to the north.")
-                elif(curr_direction == goDown):
-                    print("Take ", steps, " step(s) to the south.")
-                # reset the number of steps
-                steps = 0
+            # check to see if item is reached
+            if (item_steps_count == distanceToNextItem and item_steps_count != 0):
+                print("Pick up item ", item_next)
 
-            steps = steps + 1
+                # update next_direction
+                next_direction = arrivedAtItem
+
+                # restart the steps for direction
+                direction_steps_count = 0
+                item_steps_count = 0
+
+                # update information to get to next item
+                item_index = item_index + 1
+                if item_index == total_num_items:
+                    lastItemReached = True
+
+                if (lastItemReached == True):
+                    print("Navigation finished.")
+                    break
+                else:
+                    item_curr = self.itemslist[item_index]
+                    item_next = self.itemslist[item_index + 1]
+                    distanceToNextItem = self.item_to_item_distance.get(
+                        (self.itemslist[item_index], self.itemslist[item_index + 1]))
+                    print("Go to item ", item_next)
+                    print("Distance", distanceToNextItem)
+
+            # check to see if you changed direction
+            if (curr_direction != next_direction and curr_direction != starting and curr_direction != arrivedAtItem):
+                if (curr_direction == goRight):
+                    print("\tTake ", direction_steps_count, "\tstep(s) to the east.")
+                elif (curr_direction == goLeft):
+                    print("\tTake ", direction_steps_count, "\tstep(s) to the west.")
+                elif (curr_direction == goUp):
+                    print("\tTake ", direction_steps_count, "\tstep(s) to the north.")
+                elif (curr_direction == goDown):
+                    print("\tTake ", direction_steps_count, "\tstep(s) to the south.")
+                # reset the number of direction_steps_count
+                direction_steps_count = 0
+
+            # update direction
+            direction_steps_count = direction_steps_count + 1
             curr_x, curr_y = x_next, y_next
             curr_direction = next_direction
+
+            # update the steps to next item
+            item_steps_count = item_steps_count + 1
 
         map2 = []
         #print(resultlist)
@@ -446,6 +496,11 @@ class Map_print():
         return map2
 
     def printworldtemp_frontend2(self, map2):
+        print("=============================================================================\n")
+        print("WAREHOUSE MAP WITH PATHS\n")
+        print("Legend:\n\tS = shelf\n\tB = your starting location\n\tO = path in warehouse\n")
+        print("   North\nWest\tEast\n   South\n")
+
         count_number = 0
         map2.reverse()
         for y in map2:

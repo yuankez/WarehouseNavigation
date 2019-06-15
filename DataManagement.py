@@ -42,11 +42,12 @@ class Data():
         self.startlocation_ID = '0'
 
 
-    def load_data(self,testcase, startlocation, colmax, rowmax, Init_Map, Items_information):
+    def load_data(self,testcase, startlocation, colmax, rowmax, Init_Map, Items_information, item_to_item_Distance):
         self.itemslist = sorted(testcase + [self.startlocation_ID])
         print(self.itemslist)
         self.startlocation_input = startlocation
         self.map = Init_Map
+        self.item_to_item_distance = item_to_item_Distance
         self.result_key = Items_information
         self.rowmax = rowmax
         self.colmax = colmax
