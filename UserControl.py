@@ -11,6 +11,7 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
 
     count = 0
     start = 0
+    Optimize_order = list()
 
     stopwatch_start = time.process_time()
 
@@ -23,7 +24,7 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
 
     print("\nSelect the corresponding number of the algorithm you'd like to run.")
     print("\t1. Modified Brute Force")
-    print("\t2. Nearest Neighbor Algorithm")
+    print("\t2. Greedy Algorithm")
     choice = int(input("Enter the number: "))
     if choice == 1 or choice == 2:
         choiceValid = True
@@ -38,6 +39,19 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
             choiceValid = False
     #Brute_force_algorithm
     if choice == 1:
+        while(1):
+            Threadind_or_not = input(
+                "Please choose to use the MultiThread Or Not\n 1 for Brute Force \n 2 for Mutithread Brute Force")
+            if Threadind_or_not == '1':
+                result = Algorithm.Brut_Force2(Algorithm, item_to_item_distance, testcase)
+                # BRUTE FORCE
+                Optimize_order = list(result[1])
+                break
+            elif Threadind_or_not == '2':
+                result = Algorithm.Brut_Force(Algorithm, item_to_item_distance, testcase)
+                # BRUTE FORCE
+                Optimize_order = list(result[1])
+                break
         result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
         #BRUTE FORCE
         Optimize_order = list(result[1])
@@ -171,7 +185,7 @@ def main():
 
     elapsedTime = []
 
-
+    count = 0
     #Option Menu
     Option = -1
     productpick = ''
@@ -206,12 +220,24 @@ def main():
                 endlocationcal = int(input(("\tINVALID INPUT. Please try again: ")))
             endlocation = [int(endlocationrow), int(endlocationcal)]
 
-            print("Used testcase:", testcase5)
-            runtestcase(testcase5, startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
-                        Items_information, item_to_item_distance, printmap, elapsedTime)
+            if count == 0:
+                print("Used testcase:", testcase3)
+                runtestcase(testcase3, startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
+                            Items_information, item_to_item_distance, printmap, elapsedTime)
 
-            printTestCaseTime(elapsedTime, startlocation)
-            printMemoryUsage()
+                printTestCaseTime(elapsedTime, startlocation)
+                printMemoryUsage()
+                count = 1
+            if count == 1:
+                print("Used testcase:", testcase5)
+                runtestcase(testcase5, startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
+                            Items_information, item_to_item_distance, printmap, elapsedTime)
+
+                printTestCaseTime(elapsedTime, startlocation)
+                printMemoryUsage()
+                count == 0
+
+
         elif Option == 2:
             # input_start_location
             print("2. Order List Selected")

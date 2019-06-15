@@ -32,9 +32,121 @@ from itertools import combinations, permutations
 
 
 class Algorithm():
-
-
     def Brut_Force(self, distance_dict, testcase):
+
+        # result path
+        storepath = []
+        storepath2 = []
+
+
+        self.result_path = []
+        self.result_path2 = []
+        self.result_path3 = []
+
+        # dict
+        pathdict = distance_dict
+
+        #steps count for shortest path
+        shortest_path_count = 0
+        Final_path_cout = 0
+
+        #every possible combination for testcase
+        primelist = list(permutations(testcase, len(testcase)))
+        items_to_item = pathdict.keys()
+
+        #print("Prime list",primelist)
+        #print("Path dict keys:", items_to_item, "values", pathdict.values())
+        #starting location is solid
+
+        startlocation = '0'
+
+        primelist1 = []
+        primelist2 = []
+        primelist3 = []
+        count = 0
+        for i in range(0, len(primelist), int(len(primelist)/2)):
+            if count == 0:
+                primelist1 = primelist[i:i + int(len(primelist)/2)]
+            else:
+                primelist2 = primelist[i:i + int(len(primelist)/2)]
+            count += 1
+
+        from threading import Thread
+
+        threads = [None] * 2
+        results = [None] * 2
+
+        for i in range(len(threads)):
+            if i == 1:
+                threads[i] = Thread(target=self.Prime_threading, args=(self,primelist1,Final_path_cout,
+                                                                   shortest_path_count,items_to_item,startlocation,storepath,pathdict))
+            else:
+                threads[i] = Thread(target=self.Prime_threading2, args=(self, primelist2, Final_path_cout,
+                                                                        shortest_path_count, items_to_item,
+                                                                        startlocation, storepath, pathdict))
+            threads[i].start()
+        threads[0].join()
+        threads[1].join()
+
+        if self.result_path[0] < self.result_path2[0]:
+            return self.result_path
+        else:
+            return self.result_path2
+
+        # return [self.result_path2, self.result_path]
+       # return [shortest_path_count, storepath]
+
+    def Prime_threading(self,primelist, Final_path_cout, shortest_path_count,items_to_item,startlocation,storepath, pathdict):
+        for prime in primelist:
+            # print("This time prime:", prime)
+            for item in prime:
+                if shortest_path_count >= Final_path_cout and Final_path_cout != 0:
+                    pass
+                elif (startlocation, item) in items_to_item:
+                    shortest_path_count += pathdict.get((startlocation,item))
+                    startlocation = item
+                elif (item, startlocation) in items_to_item:
+                    shortest_path_count += pathdict.get((item,startlocation))
+                    startlocation = item
+            if Final_path_cout == 0:
+                Final_path_cout = shortest_path_count
+                storepath = prime
+            elif Final_path_cout > shortest_path_count:
+                Final_path_cout = shortest_path_count
+                storepath = prime
+            shortest_path_count = 0
+        storepath = storepath + ('01',)
+        print("The shortes path is:", storepath)
+        print("The steps count:", Final_path_cout)
+        self.result_path = [Final_path_cout,storepath]
+
+    def Prime_threading2(self, primelist, Final_path_cout, shortest_path_count, items_to_item, startlocation,
+                        storepath, pathdict):
+        for prime in primelist:
+            # print("This time prime:", prime)
+            for item in prime:
+                if shortest_path_count >= Final_path_cout and Final_path_cout != 0:
+                    pass
+                elif (startlocation, item) in items_to_item:
+                    shortest_path_count += pathdict.get((startlocation, item))
+                    startlocation = item
+                elif (item, startlocation) in items_to_item:
+                    shortest_path_count += pathdict.get((item, startlocation))
+                    startlocation = item
+            if Final_path_cout == 0:
+                Final_path_cout = shortest_path_count
+                storepath = prime
+            elif Final_path_cout > shortest_path_count:
+                Final_path_cout = shortest_path_count
+                storepath = prime
+            shortest_path_count = 0
+        storepath = storepath + ('01',)
+        print("The shortes path is:", storepath)
+        print("The steps count:", Final_path_cout)
+
+        self.result_path2 = [Final_path_cout,storepath]
+
+    def Brut_Force2(self, distance_dict, testcase):
 
         # result path
         storepath = []
