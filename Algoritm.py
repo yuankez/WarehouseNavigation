@@ -79,11 +79,11 @@ class Algorithm():
                 Final_path_cout = shortest_path_count
                 storepath = prime
             shortest_path_count = 0
+        print("The shortes path after optimized is:", storepath)
         storepath = storepath + ('01',)
-        print("The shortes path is:", storepath)
-        print("The steps count:", Final_path_cout)
+        print("The steps count for total:", Final_path_cout)
 
-        return [shortest_path_count, storepath]
+        return [Final_path_cout, storepath]
 
 
     def Nearest_Neighbour(self, distance_dict, testcase, startlocation, Init_Map,colmax, rowmax, Items_information):
@@ -117,7 +117,7 @@ class Algorithm():
 
         Map = []
         result_order = []
-        print(self.testcase)
+        #print(self.testcase)
         temp_shortest = 999999
         temp_shortest_item = ''
         first_startlocation = startlocation
@@ -166,9 +166,9 @@ class Algorithm():
             temp_shortest = 99999
 
         result_order = result_order + ['01']
-        print(Map)
-        print(result)
-        print(result_order)
+        #print(Map)
+        #print(result)
+        #print(result_order)
 
         return (result_order, result)
 

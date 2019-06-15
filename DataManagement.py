@@ -76,11 +76,11 @@ class Data():
         self.itemwepreviouswant = 0
 
         item_to_item_list = list(itertools.combinations(self.itemslist, 2))
-        print("item to item list:", item_to_item_list)
+       # print("item to item list:", item_to_item_list)
 
         for i in item_to_item_list:
             items_distance = self.inserttobackend(i, items_distance)
-        print("item to item distance", items_distance)
+       #` print("item to item distance", items_distance)
 
         #print(self.pathlist)
 
@@ -352,6 +352,7 @@ class Data():
         time.sleep(1)
         print("\n")
         print("=============================================================================\n")
+        time.sleep(0.5)
         # self.print()
 
 

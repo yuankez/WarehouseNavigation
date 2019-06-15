@@ -136,7 +136,7 @@ class Map_print():
         # else:
         #     self.storpath.append([self.itemwepreviouswant, [self.itemwewant, self.path]])
 
-        self.map[self.accessdestination[1]][self.accessdestination[0]] = 1
+        self.map[self.accessdestination[1]][self.accessdestination[0]] = 6
 
         #store to distance_dict
         items_distance[start_to_productID] = self.path[0]
@@ -331,42 +331,6 @@ class Map_print():
 
 
 
-    def printworldtemp_frontend(self):
-
-        self.avaliablepath = list()
-        # self.print()
-        count_number = 0
-        for y in self.map:
-            templist = list()
-            for x in y:
-
-                if x == 1:
-                    print("  .  ", end = '')
-                elif x == 0:
-                    print("  S  ", end = '')
-                    # or print pick up
-                    # break
-                elif x == 2:
-                    print("  B  ", end = '')
-                elif x == 3:
-                    print("  E  ", end = '')
-                elif x == 4:
-                    print("  D  ", end = '')
-            print(self.colmax - 1 - count_number)
-            count_number += 1
-            print("\n")
-
-        for i in range(self.rowmax):
-            if i < 10:
-                print(" ", i, " ", end = '')
-            elif i == 10:
-                print(" ", i, " ", end = '')
-            else:
-                print("", i, " ", end = '')
-        time.sleep(1)
-        print("\n")
-        print("=============================================================================\n")
-        # self.print()
 
 
     def addinfotomap2(self,resultlist):
@@ -419,8 +383,8 @@ class Map_print():
                 next_direction = goDown
 
             # check to see if item is reached
-            if (item_steps_count == distanceToNextItem and item_steps_count != 0):
-                # print("Pick up item ", item_next)
+            if item_steps_count == distanceToNextItem and item_steps_count != 0:
+                print("Pick up item ", item_next)
 
                 # update next_direction
                 next_direction = arrivedAtItem
@@ -449,12 +413,17 @@ class Map_print():
             if (curr_direction != next_direction and curr_direction != starting and curr_direction != arrivedAtItem):
                 if (curr_direction == goRight):
                     print("\tTake ", direction_steps_count, "\tstep(s) to the east.")
+                    time.sleep(0.1)
                 elif (curr_direction == goLeft):
                     print("\tTake ", direction_steps_count, "\tstep(s) to the west.")
+                    time.sleep(0.1)
                 elif (curr_direction == goUp):
                     print("\tTake ", direction_steps_count, "\tstep(s) to the north.")
+                    time.sleep(0.1)
                 elif (curr_direction == goDown):
                     print("\tTake ", direction_steps_count, "\tstep(s) to the south.")
+                    time.sleep(0.1)
+
                 # reset the number of direction_steps_count
                 direction_steps_count = 0
 
@@ -516,6 +485,8 @@ class Map_print():
                     # break
                 elif x == 2:
                     print(" B ", end='')
+                elif x == 6:
+                    print(" X ", end='')
                 elif x == 3:
                     print(" O ", end='')
                 elif x == 4:
