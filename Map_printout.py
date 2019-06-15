@@ -493,6 +493,11 @@ class Map_print():
         return map2
 
     def printworldtemp_frontend2(self, map2):
+        print("=============================================================================\n")
+        print("WAREHOUSE MAP WITH PATHS\n")
+        print("Legend:\n\tS = shelf\n\tB = your starting location\n\tO = path in warehouse\n")
+        print("   North\nWest\tEast\n   South\n")
+
         count_number = 0
         map2.reverse()
         for y in map2:
