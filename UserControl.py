@@ -4,7 +4,7 @@ from Algoritm import Algorithm
 from Map_printout import Map_print
 import StoreData
 import time
-#import psutil
+import psutil
 import os
 
 def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init_Map, Items_information, item_to_item_distance, printmap, elapsedTime):
@@ -21,16 +21,27 @@ def runtestcase(testcase, startlocation, endlocation, data, colmax, rowmax, Init
     #anaylsis input_bfs
     item_to_item_distance = data.analysisinput()
 
+    print("\nSelect the corresponding number of the algorithm you'd like to run.")
+    print("\t1. Modified Brute Force")
+    print("\t2. Nearest Neighbor Algorithm")
+    choice = int(input("Enter the number: "))
+    if choice == 1 or choice == 2:
+        choiceValid = True
+    else:
+        choiceValid = False
 
-    choice = input("Now you can choose to use Algorithm Brut Force Modified or NN Modified, 1 Brute Force, 2 for NN")
+    while(choiceValid == False):
+        choice = int(input(("\tINVALID INPUT. Please enter 1 or 2: ")))
+        if choice == 1 or choice == 2:
+            choiceValid = True
+        else:
+            choiceValid = False
     #Brute_force_algorithm
-    if choice == '1' or 'Brute Force':
+    if choice == 1:
         result = Algorithm.Brut_Force(Algorithm,item_to_item_distance, testcase)
-
-
         #BRUTE FORCE
         Optimize_order = list(result[1])
-    elif choice == '2' or 'NN':
+    elif choice == 2:
 
         result = Algorithm.Nearest_Neighbour(Algorithm,item_to_item_distance, testcase, startlocation, Init_Map, colmax, rowmax, Items_information)
         Optimize_order = result[0]
@@ -158,85 +169,120 @@ def main():
     #because of the huge database, for now only print one item
     #data.finditemsinformation('1')
 
-
-    print("\nWelcome to the Warehouse Navigator")
-    print("What position are you starting from in the warehouse?")
-    print("\tRow input is valid from:\t 0 to ",  Map_row_max -1)
-    print("\tColumn input is valid from:\t 0 to ", Map_col_max-1)
-    #input_start_location
-    startlocationrow = input("Please the start location row number: " )
-    startlocationcal = input("Please the start location col number: " )
-    startlocation = [int(startlocationrow),int(startlocationcal)]
-
-    #input end location
-    endlocationrow = input("Please the end location row number: " )
-    endlocationcal = input("Please the start location col number: " )
-    endlocation = [int(endlocationrow),int(endlocationcal)]
-
     elapsedTime = []
 
 
     #Option Menu
-    Option = ''
+    Option = -1
     productpick = ''
     input_testcase = []
-    while(Option != 'exit'):
+    print("Welcome to the Warehouse Navigator\n")
+    while(Option != 3):
         print("============================\n\n")
-        Option = input("Option Menu:\n 1. Use Sample Testcase  (input 1)\n 2. Get into input list orders Model (input 2)\n Type exit or 4 to exit")
-        if Option == '1':
+        print("Option Menu:\nSelect the corresponding number of navgation mode you'd like to run.")
+        print("\t1. Use Sample Testcase")
+        print("\t2. Use Order list")
+        print("\t3. Exit the program")
+        Option = int(input("Enter the number: "))
+        print("\n")
+
+        if Option == 1:
+            print("1. Sample Test Case Selected")
+            # input_start_location
+            startlocationrow = int(input("Please the start location row number: "))
+            while (startlocationrow < 0 or startlocationrow > Map_row_max):
+                startlocationrow = int(input(("\tINVALID INPUT. Please try again: ")))
+            startlocationcal = int(input("Please the start location col number: "))
+            while (startlocationcal < 0 or startlocationcal > Map_col_max):
+                startlocationcal = int(input(("\tINVALID INPUT. Please try again: ")))
+            startlocation = [int(startlocationrow), int(startlocationcal)]
+
+            # input end location
+            endlocationrow = int(input("Please the end location row number: "))
+            while (endlocationrow < 0 or endlocationrow > Map_row_max):
+                endlocationrow = int(input(("\tINVALID INPUT. Please try again: ")))
+            endlocationcal = int(input("Please the start location col number: "))
+            while (endlocationcal < 0 or endlocationcal > Map_col_max):
+                endlocationcal = int(input(("\tINVALID INPUT. Please try again: ")))
+            endlocation = [int(endlocationrow), int(endlocationcal)]
+
             print("Used testcase:", testcase5)
             runtestcase(testcase5, startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
                         Items_information, item_to_item_distance, printmap, elapsedTime)
 
             printTestCaseTime(elapsedTime, startlocation)
             printMemoryUsage()
-        if Option == '2':
+        elif Option == 2:
+            # input_start_location
+            print("2. Order List Selected")
+            startlocationrow = int(input("Please the start location row number: "))
+            while (startlocationrow < 0 or startlocationrow > Map_row_max):
+                startlocationrow = int(input(("\tINVALID INPUT. Please try again: ")))
+            startlocationcal = int(input("Please the start location col number: "))
+            while (startlocationcal < 0 or startlocationcal > Map_col_max):
+                startlocationcal = int(input(("\tINVALID INPUT. Please try again: ")))
+            startlocation = [int(startlocationrow), int(startlocationcal)]
+
+            # input end location
+            endlocationrow = int(input("Please the end location row number: "))
+            while (endlocationrow < 0 or endlocationrow > Map_row_max):
+                endlocationrow = int(input(("\tINVALID INPUT. Please try again: ")))
+            endlocationcal = int(input("Please the start location col number: "))
+            while (endlocationcal < 0 or endlocationcal > Map_col_max):
+                endlocationcal = int(input(("\tINVALID INPUT. Please try again: ")))
+            endlocation = [int(endlocationrow), int(endlocationcal)]
             #      List of Order
             # takeorderaslist(startlocation, data, elapsedTime)
 
-            inputlistoforder = input("please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
+            inputlistoforder = input("Please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
             inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
 
             orderlist = takealistoforder(inputlistoforder)
 
-            orderlistnumber = int(input("pleast input which order list number you want to choose: EX: 1 "))
+            print("Order list number input is valid from 0 to 100.")
+            orderlistnumber = int(input("Please input which order list number you want to choose: "))
+            while(orderlistnumber < 0 or orderlistnumber > 100):
+                orderlistnumber = int(input(("\tINVALID INPUT. Please try again: )")))
+
             testcase = orderlist[int(orderlistnumber)]
             del orderlist[int(orderlistnumber)]
             runtestcase(testcase, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map,
                         Items_information, item_to_item_distance, printmap, elapsedTime)
 
-            templist2 = orderlist.keys()
-            templist = []
-            for i in templist2:
-                templist.append(i)
-            for i in range(len(orderlist)):
-                temp = input("Please input next order list to pick the next one: EX, Next or 2")
-                if temp == 'next' or temp == "Next":
-                    orderlistnumber = orderlistnumber + 1
-                    while (1):
-                        if orderlistnumber in templist:
-                            break
-                        elif orderlistnumber >= len(templist):
-                            break
-                        else:
-                            orderlistnumber = orderlistnumber + 1
-                    runtestcase(orderlist[orderlistnumber], startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
-                        Items_information, item_to_item_distance, printmap, elapsedTime)
-                    del orderlist[int(orderlistnumber)]
-                    templist.remove(orderlistnumber)
-                elif temp == 'exit':
-                    print("Pick up has been stoped")
-                    break
-                else:
-                    orderlistnumber = temp
-                    runtestcase(orderlist[int(orderlistnumber)], startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
-                        Items_information, item_to_item_distance, printmap, elapsedTime)
-                    del orderlist[int(orderlistnumber)]
-                    templist.remove(orderlistnumber)
-            printTestCaseTime(elapsedTime, startlocation)
-            printMemoryUsage()
-
-
+            # templist2 = orderlist.keys()
+            # templist = []
+            # for i in templist2:
+            #     templist.append(i)
+            # for i in range(len(orderlist)):
+            #     temp = input("Please input next order list to pick the next one: EX, Next or 2")
+            #     if temp == 'next' or temp == "Next":
+            #         orderlistnumber = orderlistnumber + 1
+            #         while (1):
+            #             if orderlistnumber in templist:
+            #                 break
+            #             elif orderlistnumber >= len(templist):
+            #                 break
+            #             else:
+            #                 orderlistnumber = orderlistnumber + 1
+            #         runtestcase(orderlist[orderlistnumber], startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
+            #             Items_information, item_to_item_distance, printmap, elapsedTime)
+            #         del orderlist[int(orderlistnumber)]
+            #         templist.remove(orderlistnumber)
+            #     elif temp == 'exit':
+            #         print("Pick up has been stoped")
+            #         break
+            #     else:
+            #         orderlistnumber = temp
+            #         runtestcase(orderlist[int(orderlistnumber)], startlocation, endlocation, data, Map_col_max, Map_row_max, Init_Map,
+            #             Items_information, item_to_item_distance, printmap, elapsedTime)
+            #         del orderlist[int(orderlistnumber)]
+            #         templist.remove(orderlistnumber)
+            # printTestCaseTime(elapsedTime, startlocation)
+            # printMemoryUsage()
+        elif Option == 3:
+            print("3. Exiting Program Selected")
+        else:
+            print("INVALID INPUT. Please enter a value of 1, 2 or 3.")
 
 
 
@@ -248,21 +294,21 @@ def main():
 
     count = 0
     #data.inserttobackend([0,0], '149',count)
-    elapsedTime = []
-
-
-    inputlistoforder = input("please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
-    inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
-    order = takealistoforder(inputlistoforder)
-    # print("ORDER ", order)
-    orderlistnumber = int(input("Please input which order you'd like to find (0 to 100): EX: 1 "))
-    testcase = order[int(orderlistnumber)]
-
-    # single test case
-    runtestcase(testcase3, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
-
-    printTestCaseTime(elapsedTime, startlocation)
-    printMemoryUsage()
+    # elapsedTime = []
+    #
+    #
+    # inputlistoforder = input("please input the order list path you want: qvBox-warehouse-orders-list-part01.txt")
+    # inputlistoforder = "qvBox-warehouse-orders-list-part01.txt"
+    # order = takealistoforder(inputlistoforder)
+    # # print("ORDER ", order)
+    # orderlistnumber = int(input("Please input which order you'd like to find (0 to 100): EX: 1 "))
+    # testcase = order[int(orderlistnumber)]
+    #
+    # # single test case
+    # runtestcase(testcase3, startlocation,endlocation, data, Map_col_max, Map_row_max, Init_Map, Items_information, item_to_item_distance, printmap,elapsedTime)
+    #
+    # printTestCaseTime(elapsedTime, startlocation)
+    # printMemoryUsage()
 
 
 

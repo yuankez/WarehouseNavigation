@@ -51,6 +51,7 @@ class Map_print():
         self.startlocation_input = startlocation
         self.map = Init_Map
         self.result_key = Items_information
+        print("ITEM INFO : ", Items_information)
         self.rowmax = rowmax
         self.colmax = colmax
         self.endlocation_input = endlocation
@@ -67,6 +68,23 @@ class Map_print():
         for key,value in self.result_key.items():
             if key == product_ID:
                 print("Product: ", product_ID, "Location is: [", self.result_key[product_ID]['xLocation'],',', self.result_key[product_ID]['yLocation'],']')
+
+    def finditemLocation(self, product_ID_list):
+        keys = self.result_key.keys()
+        locationList = []
+        for product_ID in product_ID_list:
+            list = []
+            if product_ID not in keys:
+                print("Database does not have this item. Input Over")
+                return False
+            else:
+                x_coor = self.result_key[product_ID]['xLocation']
+                y_coor = self.result_key[product_ID]['yLocation'] + 1 # access north +1
+                list.append(x_coor)
+                list.append(y_coor)
+                locationList.append(list)
+        return locationList
+
 
     def analysisinput(self):
         self.pathlist = []
@@ -123,7 +141,7 @@ class Map_print():
         self.path = self.findpathtoitem1(startlocation, self.itemwewantlocation)
         # print("path is :",self.path)
 
-        if self.path[0] != 'The path is not eixt':
+        if self.path[0] != 'The path is not exit':
             #self.totalpath += int(self.path[0])
             #print(self.totalpath)
             self.pathlist.append(self.path[1])
@@ -336,9 +354,11 @@ class Map_print():
     def addinfotomap2(self,resultlist):
         #print("final path list:", resultlist)
         print("\nPath Directions To: ")
+        productID_list = []
         for i in range(len(self.itemslist)-1):
             if (i != 0):
                 print("item ", self.itemslist[i])
+                productID_list.append(self.itemslist[i])
 
         print("\nStart.")
         # states of the path direction
@@ -384,7 +404,7 @@ class Map_print():
 
             # check to see if item is reached
             if item_steps_count == distanceToNextItem and item_steps_count != 0:
-                print("Pick up item ", item_next)
+            #     print("Pick up item ", item_next)
 
                 # update next_direction
                 next_direction = arrivedAtItem
@@ -436,6 +456,24 @@ class Map_print():
             item_steps_count = item_steps_count + 1
         print("Navigation finished.")
 
+        itemlocation = self.finditemLocation(productID_list)
+        # print("ITEMLOCATION", itemlocation)
+        # for i in range(len(itemlocation)):
+        #     x_coor, y_coor = itemlocation[i]
+        #     print("X_coor: ", x_coor, "Y_coor", y_coor)
+        item_coor = False
+
+        # print("number h",h)
+        # for j in range(len(itemlocation)):
+        #     x_coor, y_coor = itemlocation[j]
+        #     if h == x_coor and i == y_coor:
+        #         templist.append(6)
+        #         item_coor = True
+
+            # print("Map2 Before ", map2[x_coor][y_coor])
+            # map2[x_coor][y_coor] = 6
+        # return map2
+
         map2 = []
         #print(resultlist)
         #print([1,2] in resultlist)
@@ -443,31 +481,40 @@ class Map_print():
             # print(i,"number i ")
             templist = list()
             for h in range(self.rowmax):
-                # print("number h",h)
-                if [h, i] == self.startlocation_input:
-                    # raise Exception("start location on the shelf wrong")
-                    # break
-                    templist.append(2)
-                elif [h,i] == self.accessdestination:
-                    templist.append(3)
-                elif (h,i) in resultlist:
-                    templist.append(5)
-                elif [h, i] in self.currentPos_list:
-                    templist.append(0)
-                elif [h, i] == self.itemwewantlocation:
-                    templist.append(4)
-                    # print("check here", h,i)
-                else:
-                    templist.append(1)
+                for j in range(len(itemlocation)):
+                    x_coor, y_coor = itemlocation[j]
+                    if h == x_coor and i == y_coor:
+                        templist.append(6)
+                        item_coor = True
+                if(item_coor == False):
+                    if [h, i] == self.startlocation_input:
+                        # raise Exception("start location on the shelf wrong")
+                        # break
+                        templist.append(2)
+                    elif [h,i] == self.accessdestination:
+                        templist.append(3)
+                    elif (h,i) in resultlist:
+                        templist.append(5)
+                    elif [h, i] in self.currentPos_list:
+                        templist.append(0)
+                    elif [h, i] == self.itemwewantlocation:
+                        templist.append(4)
+                        # print("check here", h,i)
+                    else:
+                        templist.append(1)
+                item_coor = False
+                if(len(templist) > self.rowmax):
+                    templist.pop() #sometimes an exception happens and theres an extra ' . '
             #print(templist)
             map2.append(templist)
         # print("look here", self.map[15][19])
+        # print(map2)
         return map2
 
     def printworldtemp_frontend2(self, map2):
         print("=============================================================================\n")
         print("WAREHOUSE MAP WITH PATHS\n")
-        print("Legend:\n\tS = shelf\n\tB = your starting location\n\tO = path in warehouse\n")
+        print("Legend:\n\tB = your starting location\n\tS = shelf\n\tO = path in warehouse\n\tX = pick up item here\n")
         print("   North\nWest\tEast\n   South\n")
 
         count_number = 0
@@ -476,33 +523,32 @@ class Map_print():
             templist = list()
             templist = list()
             for x in y:
-
                 if x == 1:
-                    print(" . ", end='')
+                    print("  .  ", end='')
                 elif x == 0:
-                    print(" S ", end='')
+                    print("  S  ", end='')
                     # or print pick up
                     # break
                 elif x == 2:
-                    print(" B ", end='')
+                    print("  B  ", end='')
                 elif x == 6:
-                    print(" X ", end='')
+                    print("  X  ", end='')
                 elif x == 3:
-                    print(" O ", end='')
+                    print("  O  ", end='')
                 elif x == 4:
-                    print(" D ", end='')
+                    print("  D  ", end='')
                 elif x == 5:
-                    print(" O ", end='')
+                    print("  O  ", end='')
             print(self.colmax - 1 - count_number)
             count_number += 1
         for i in range(self.rowmax):
 
             if i < 10:
-                print("", i, "", end='')
+                print(" ", i, " ", end='')
             elif i == 10:
-                print("", i, "", end='')
+                print(" ", i, "", end='')
             else:
-                print("",i, end='')
+                print(" ",i, end=' ')
         time.sleep(1)
         print("\n")
         print("=============================================================================\n")
